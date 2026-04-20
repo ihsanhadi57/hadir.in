@@ -4,6 +4,7 @@ import 'core/network/secure_storage_service.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/event/data/repositories/event_repository.dart';
+import 'features/event/data/repositories/payment_repository.dart';
 
 final sl = GetIt.instance;
 
@@ -16,6 +17,7 @@ Future<void> init() async {
 
   // ─── Features: Event ───
   sl.registerLazySingleton(() => EventRepository(dioClient: sl()));
+  sl.registerLazySingleton(() => PaymentRepository(sl()));
 
   // ─── Core ───
   sl.registerLazySingleton(() => DioClient());

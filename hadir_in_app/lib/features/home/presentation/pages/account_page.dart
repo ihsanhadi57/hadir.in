@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hadir_in_app/features/event/data/repositories/payment_repository.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../injection_container.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -9,8 +12,59 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 import 'edit_profile_page.dart';
 import 'help_faq_page.dart';
 
-class AccountPage extends StatelessWidget {
+class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
+
+  @override
+  State<AccountPage> createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  bool _isLoading = false;
+  final PaymentRepository _paymentRepository = sl<PaymentRepository>();
+
+  Future<void> _handleTopUp(int quota, int amount) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await _paymentRepository.createSnapTransaction(
+        quota: quota,
+        amount: amount,
+      );
+
+      final String? redirectUrl = result['redirect_url'];
+
+      if (redirectUrl != null && await canLaunchUrl(Uri.parse(redirectUrl))) {
+        await launchUrl(
+          Uri.parse(redirectUrl),
+          mode: LaunchMode.externalApplication,
+        );
+
+        // Show success/info message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Membuka halaman pembayaran...'),
+              backgroundColor: AppTheme.primary,
+            ),
+          );
+        }
+      } else {
+        throw Exception('Gagal membuka halaman pembayaran.');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,27 +80,50 @@ class AccountPage extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppTheme.background,
-          body: SafeArea(
-            child: RefreshIndicator(
-              color: AppTheme.primary,
-              onRefresh: () async {
-                context.read<AuthBloc>().add(FetchProfileRequested());
-                await Future.delayed(const Duration(milliseconds: 800));
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
-                child: Column(
-                  children: [
-                    _buildProfileCard(context, user),
-                    const SizedBox(height: 20),
-                    if (user != null) _buildQuotaCard(context, user),
-                    if (user != null) const SizedBox(height: 20),
-                    _buildMenuList(context, user),
-                  ],
+          body: Stack(
+            children: [
+              SafeArea(
+                child: RefreshIndicator(
+                  color: AppTheme.primary,
+                  onRefresh: () async {
+                    context.read<AuthBloc>().add(FetchProfileRequested());
+                    await Future.delayed(const Duration(milliseconds: 800));
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+                    child: Column(
+                      children: [
+                        _buildProfileCard(context, user),
+                        const SizedBox(height: 20),
+                        if (user != null) _buildQuotaCard(context, user),
+                        if (user != null) const SizedBox(height: 20),
+                        _buildMenuList(context, user),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+              if (_isLoading)
+                Container(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  child: const Center(
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Memproses Transaksi...'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         );
       },
@@ -100,7 +177,7 @@ class AccountPage extends StatelessWidget {
                       image: NetworkImage(user!.avatarUrl!),
                       fit: BoxFit.cover,
                       onError: (exception, stackTrace) {
-                        // Fallback handling inside state or just let it be null
+                        // Fallback handling
                       },
                     )
                   : null,
@@ -117,17 +194,17 @@ class AccountPage extends StatelessWidget {
                     ),
                   )
                 : (user.avatarUrl == null)
-                    ? Center(
-                        child: Text(
-                          initials,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+                ? Center(
+                    child: Text(
+                      initials,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
           const SizedBox(height: 14),
           Text(
@@ -138,10 +215,7 @@ class AccountPage extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 4),
-          // Email dihapus sesuai permintaan user agar lebih clean
-
-          const SizedBox(height: 6),
+          const SizedBox(height: 14),
         ],
       ),
     );
@@ -151,7 +225,7 @@ class AccountPage extends StatelessWidget {
   Widget _buildQuotaCard(BuildContext context, UserModel user) {
     final quota = user.emailQuota;
     final sent = user.totalEmailsSent;
-    final totalEver = quota + sent; // Total yang pernah dimiliki
+    final totalEver = quota + sent;
     final percentage = totalEver > 0
         ? (quota / totalEver).clamp(0.0, 1.0)
         : 1.0;
@@ -173,7 +247,6 @@ class AccountPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ─── Header ───
           Row(
             children: [
               Container(
@@ -198,7 +271,6 @@ class AccountPage extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              // Top-up Button (placeholder for Midtrans integration)
               GestureDetector(
                 onTap: () => _showTopUpDialog(context),
                 child: Container(
@@ -227,8 +299,6 @@ class AccountPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-
-          // ─── Stats Row ───
           Row(
             children: [
               Expanded(
@@ -256,8 +326,6 @@ class AccountPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-
-          // ─── Progress Bar ───
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
@@ -307,7 +375,6 @@ class AccountPage extends StatelessWidget {
     );
   }
 
-  // ─── Top Up Dialog (placeholder) ───
   void _showTopUpDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -364,17 +431,19 @@ class AccountPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildPackageCards(BuildContext ctx) {
+  List<Widget> _buildPackageCards(BuildContext dialogContext) {
     final packages = [
       _QuotaPackage(
         quota: 500,
         price: 'Rp 5.500',
+        amount: 5500,
         perEmail: 'Rp 11/email',
         color: const Color(0xFF10B981),
       ),
       _QuotaPackage(
         quota: 1000,
         price: 'Rp 10.500',
+        amount: 10500,
         perEmail: 'Rp 10.5/email',
         color: AppTheme.primary,
         isPopular: true,
@@ -382,122 +451,120 @@ class AccountPage extends StatelessWidget {
       _QuotaPackage(
         quota: 2000,
         price: 'Rp 20.000',
+        amount: 20000,
         perEmail: 'Rp 10/email (Hemat!)',
         color: const Color(0xFF8B5CF6),
       ),
     ];
 
-    return packages
-        .map(
-          (pkg) => Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
+    return packages.map((pkg) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              Navigator.pop(dialogContext);
+              _handleTopUp(pkg.quota, pkg.amount);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(16),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  // TODO: Integrate Midtrans checkout
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: pkg.isPopular
-                          ? AppTheme.primary.withValues(alpha: 0.4)
-                          : Colors.transparent,
-                      width: 1.5,
+                border: Border.all(
+                  color: pkg.isPopular
+                      ? AppTheme.primary.withValues(alpha: 0.4)
+                      : Colors.transparent,
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: pkg.color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.email_outlined,
+                      color: pkg.color,
+                      size: 22,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: pkg.color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.email_outlined,
-                          color: pkg.color,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  '${pkg.quota} Email',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                                if (pkg.isPopular) ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.primary,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      'Terlaris 🔥',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
                             Text(
-                              pkg.perEmail,
+                              '${pkg.quota} Email',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                color: AppTheme.textMuted,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textPrimary,
                               ),
                             ),
+                            if (pkg.isPopular) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  'Terlaris 🔥',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
-                      ),
-                      Text(
-                        pkg.price,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: pkg.color,
+                        Text(
+                          pkg.perEmail,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppTheme.textMuted,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppTheme.textMuted,
-                        size: 18,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                  Text(
+                    pkg.price,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: pkg.color,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppTheme.textMuted,
+                    size: 18,
+                  ),
+                ],
               ),
             ),
           ),
-        )
-        .toList();
+        ),
+      );
+    }).toList();
   }
 
-  // ─── Menu List ───
   Widget _buildMenuList(BuildContext context, UserModel? user) {
     return Container(
       decoration: BoxDecoration(
@@ -511,12 +578,11 @@ class AccountPage extends StatelessWidget {
             icon: Icons.edit_outlined,
             label: 'Edit Profil',
             onTap: () {
-              final currentUser = user;
-              if (currentUser != null) {
+              if (user != null) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => EditProfilePage(user: currentUser),
+                    builder: (_) => EditProfilePage(user: user),
                   ),
                 );
               }
@@ -599,7 +665,6 @@ class AccountPage extends StatelessWidget {
   }
 }
 
-// ─── Quota Stat Item ───
 class _QuotaStatItem extends StatelessWidget {
   final String value;
   final String label;
@@ -642,6 +707,7 @@ class _QuotaStatItem extends StatelessWidget {
 class _QuotaPackage {
   final int quota;
   final String price;
+  final int amount;
   final String perEmail;
   final Color color;
   final bool isPopular;
@@ -649,6 +715,7 @@ class _QuotaPackage {
   const _QuotaPackage({
     required this.quota,
     required this.price,
+    required this.amount,
     required this.perEmail,
     required this.color,
     this.isPopular = false,

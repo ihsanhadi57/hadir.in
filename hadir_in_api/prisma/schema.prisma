@@ -28,6 +28,7 @@ model User {
   events      Event[]         @relation("OrganizerEvents")
   scannedLogs AttendanceLog[] @relation("ScannedBy")
   committees  EventCommittee[] // Events where user is panitia
+  topups      TopupTransaction[]
 
   @@map("users")
 }
@@ -110,4 +111,20 @@ model AttendanceLog {
   scannedBy     User?       @relation("ScannedBy", fields: [scannedById], references: [id])
 
   @@map("attendance_logs")
+}
+
+// 5. Tabel Topup Transactions (Midtrans)
+model TopupTransaction {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  orderId          String   @unique // Format: HADIRIN-TIMESTAMP-USERID
+  amount           Int
+  quota            Int
+  status           String   @default("pending") // pending, settlement, expire, cancel
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("topup_transactions")
 }

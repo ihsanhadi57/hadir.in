@@ -1,0 +1,166 @@
+hadir.in
+Platform Manajemen Event & Tiket
+Syarat & Ketentuan Layanan untuk Organizer
+Versi Dokumen
+1.0
+Berlaku Sejak
+2025
+Bahasa
+Bahasa Indonesia
+Berlaku untuk
+Seluruh Organizer pengguna hadir.in
+⚠️  PENTING — Baca Sebelum Menggunakan
+• Dokumen ini mengatur hak dan kewajiban kamu sebagai Organizer di platform hadir.in.
+• Dengan mendaftar dan menggunakan layanan hadir.in, kamu dianggap telah membaca dan menyetujui seluruh ketentuan ini.
+• Bagian yang paling penting untuk dipahami: Pasal 3 (Data Peserta), Pasal 5 (Email & Kredit), dan Pasal 7 (Suspend Akun).
+Pasal 1 — Tentang hadir.in
+hadir.in adalah platform manajemen event dan tiket yang memungkinkan Organizer untuk:
+Membuat dan mengelola event
+Menerbitkan tiket digital untuk peserta
+Mengirim email notifikasi dan pengumuman kepada peserta
+Melakukan absensi peserta melalui pemindaian QR code
+hadir.in berperan sebagai penyedia infrastruktur teknologi. Kami bukan penyelenggara event dan tidak bertanggung jawab atas konten, kelancaran, atau hasil dari event yang dibuat oleh Organizer.
+Pasal 2 — Pendaftaran & Akun Organizer
+2.1  Persyaratan Pendaftaran
+Untuk menggunakan layanan hadir.in sebagai Organizer, kamu wajib:
+Berusia minimal 17 tahun atau mendapat persetujuan wali yang sah
+Memberikan informasi pendaftaran yang benar, lengkap, dan terkini
+Menggunakan alamat email aktif yang dapat menerima pesan
+Bertanggung jawab penuh atas keamanan password dan akun kamu
+2.2  Satu Akun per Organizer
+Setiap individu atau organisasi hanya diperbolehkan memiliki satu akun Organizer aktif. Pembuatan akun ganda untuk menghindari suspend atau batasan platform adalah pelanggaran dan dapat mengakibatkan penghapusan semua akun terkait tanpa pemberitahuan.
+Pasal 3 — Tanggung Jawab Data Peserta
+📋  Poin Kritis — Wajib Dipahami
+• Kamu sebagai Organizer adalah pihak yang bertanggung jawab penuh atas keakuratan data peserta yang diupload ke platform hadir.in.
+• hadir.in tidak dapat memverifikasi kebenaran alamat email setiap peserta secara individual.
+• Kesalahan data adalah tanggung jawab kamu, bukan hadir.in.
+3.1  Keakuratan Data Email Peserta
+Ketika kamu mengupload daftar peserta (melalui CSV atau input manual), kamu menyatakan dan menjamin bahwa:
+Seluruh alamat email yang diinput adalah milik peserta yang bersangkutan
+Data berasal dari sumber yang sah seperti formulir pendaftaran resmi
+Kamu telah melakukan pengecekan kewajaran data sebelum diupload
+Kamu menerima konsekuensi jika terdapat kesalahan data dalam daftar tersebut
+3.2  Risiko Kesalahan Ketik (Typo)
+hadir.in memahami bahwa kesalahan ketik pada alamat email peserta adalah risiko yang tidak dapat dihilangkan sepenuhnya. Namun perlu dipahami bahwa:
+✅  Yang Bisa Dicegah Platform
+Typo pada nama domain email
+Contoh: gmial.com → gmail.com
+❌  Yang Tidak Bisa Dicegah Platform
+Typo pada nama akun email
+Contoh: budi1 → budi2 @gmail.com
+Untuk meminimalkan risiko ini, hadir.in menyediakan fitur preview daftar peserta sebelum pengiriman tiket. Sangat disarankan untuk memanfaatkan fitur ini sebelum melanjutkan proses pengiriman.
+3.3  Persetujuan Peserta
+Kamu wajib memastikan bahwa peserta yang datanya kamu upload telah memberikan persetujuan untuk menerima komunikasi dari event yang kamu selenggarakan. Mengupload data pihak ketiga tanpa persetujuan mereka adalah pelanggaran kebijakan platform dan dapat melanggar regulasi perlindungan data yang berlaku.
+Pasal 4 — Sistem Kredit Email
+4.1  Cara Kerja Kredit
+hadir.in menggunakan sistem kredit untuk layanan pengiriman email. Setiap pengiriman email ke satu alamat akan memotong satu kredit dari saldo akun kamu. Kredit bersifat kumulatif dan tidak memiliki batas waktu kedaluwarsa selama akun dalam status aktif.
+4.2  Paket Kredit yang Tersedia
+Nama Paket
+Harga
+Jumlah Email
+Harga per Email
+Starter
+Rp 5.000
+500 email
+Rp 10 / email
+Basic
+Rp 10.000
+1.000 email
+Rp 10 / email
+Growth
+Rp 45.000
+5.000 email
+Rp 9 / email
+Pro
+Rp 80.000
+10.000 email
+Rp 8 / email
+4.3  Kredit Tidak Dapat Dikembalikan
+💰  Ketentuan Pengembalian Kredit
+• Kredit yang telah digunakan untuk pengiriman email TIDAK dapat dikembalikan dalam kondisi apapun.
+• Ini termasuk email yang gagal terkirim (bounce) akibat alamat email peserta yang tidak valid atau tidak aktif.
+• Ini termasuk email yang terkirim namun penerima tidak membukanya.
+• Pembelian kredit yang telah berhasil diproses tidak dapat direfund.
+Pasal 5 — Aturan Penggunaan Email
+5.1  Penggunaan yang Diizinkan
+Fitur email hadir.in hanya boleh digunakan untuk:
+Mengirimkan tiket digital kepada peserta event yang terdaftar
+Mengirimkan pengingat atau informasi terkait event yang peserta ikuti
+Mengirimkan perubahan jadwal, lokasi, atau detail teknis event
+Mengirimkan ucapan terima kasih atau survei pasca event kepada peserta
+5.2  Penggunaan yang DILARANG
+🚫  Larangan Keras — Pelanggaran Dapat Mengakibatkan Suspend Permanen
+• Mengirim email promosi produk atau layanan pihak ketiga yang tidak berkaitan dengan event
+• Mengirim email kepada daftar kontak yang tidak mendaftar pada event kamu
+• Mengirim konten yang mengandung unsur penipuan, pelecehan, atau melanggar hukum
+• Menggunakan platform untuk kegiatan spam dalam bentuk apapun
+• Menyebarkan konten yang melanggar hak cipta atau hak kekayaan intelektual pihak lain
+• Mengirim blast email berulang dengan konten yang sama kepada peserta yang sama
+5.3  Kewajiban Unsubscribe
+Setiap email blast yang dikirim melalui fitur pengumuman hadir.in wajib memiliki mekanisme bagi penerima untuk berhenti berlangganan (unsubscribe). hadir.in secara otomatis menyertakan tautan unsubscribe di setiap email blast. Kamu dilarang memanipulasi atau menghapus mekanisme unsubscribe tersebut.
+Peserta yang telah melakukan unsubscribe akan otomatis dihapus dari daftar penerima email blast. Mengirim ulang email kepada peserta yang telah unsubscribe adalah pelanggaran serius.
+Pasal 6 — Reputasi Email & Bounce Rate
+6.1  Mengapa Ini Penting
+hadir.in menggunakan infrastruktur email bersama untuk seluruh Organizer di platform. Bounce rate dan complaint rate yang tinggi dari satu Organizer dapat berdampak pada kualitas layanan email untuk seluruh pengguna platform. Oleh karena itu, hadir.in memantau metrik ini secara ketat.
+6.2  Batas Toleransi
+Metrik
+Aman
+Peringatan
+Suspend
+Bounce Rate (email gagal)
+< 5%
+5% - 10%
+> 10%
+Complaint Rate (dilaporkan spam)
+< 0.05%
+0.05% - 0.1%
+> 0.1%
+6.3  Proses Peringatan & Suspend
+hadir.in akan melakukan tindakan bertahap jika metrik reputasi email kamu melampaui batas toleransi:
+Tahap 1 — Notifikasi: Kamu menerima email peringatan beserta panduan perbaikan
+Tahap 2 — Pembatasan: Fitur blast email dibatasi hingga metrik membaik
+Tahap 3 — Suspend Sementara: Seluruh fitur email dinonaktifkan selama 7 hari
+Tahap 4 — Suspend Permanen: Akun dinonaktifkan jika tidak ada perbaikan setelah suspend sementara
+Kredit yang tersisa pada akun yang disuspend permanen akibat pelanggaran tidak akan dikembalikan.
+Pasal 7 — Suspend & Penutupan Akun
+7.1  Kondisi Suspend Akun
+hadir.in berhak menonaktifkan akun Organizer tanpa pemberitahuan terlebih dahulu jika:
+Bounce rate atau complaint rate melampaui batas yang ditetapkan pada Pasal 6
+Terdeteksi penggunaan platform untuk kegiatan spam atau penipuan
+Terdapat pelanggaran terhadap larangan penggunaan email pada Pasal 5.2
+Ditemukan pembuatan akun ganda untuk menghindari suspend
+Menerima laporan pelanggaran yang valid dari peserta atau pihak ketiga
+7.2  Pemulihan Akun
+Organizer yang akunnya disuspend sementara dapat mengajukan pemulihan akun setelah:
+Mengidentifikasi dan menjelaskan akar masalah yang menyebabkan suspend
+Memberikan bukti bahwa masalah telah diselesaikan
+Menyetujui langkah-langkah pencegahan yang disarankan hadir.in
+Proses pemulihan akun dapat memakan waktu 3-7 hari kerja. hadir.in berhak menolak permintaan pemulihan jika pelanggaran dianggap sangat serius.
+Pasal 8 — Batasan Tanggung Jawab hadir.in
+hadir.in tidak bertanggung jawab atas:
+Email yang gagal terkirim akibat kesalahan data yang diberikan Organizer
+Kerugian yang timbul akibat keterlambatan atau kegagalan pengiriman email karena faktor di luar kendali hadir.in
+Konten email yang dibuat dan dikirim oleh Organizer
+Sengketa antara Organizer dengan peserta event
+Gangguan layanan yang disebabkan oleh force majeure atau pemeliharaan sistem
+Dalam kondisi apapun, total tanggung jawab hadir.in kepada Organizer tidak akan melebihi nilai kredit email yang tersisa di akun Organizer pada saat kejadian.
+Pasal 9 — Perubahan Ketentuan
+hadir.in berhak mengubah Syarat & Ketentuan ini sewaktu-waktu. Perubahan akan diberitahukan melalui:
+Email notifikasi ke alamat email terdaftar Organizer minimal 7 hari sebelum perubahan berlaku
+Pengumuman di dashboard aplikasi hadir.in
+Jika kamu terus menggunakan layanan setelah perubahan berlaku, kamu dianggap telah menyetujui ketentuan yang baru.
+Pasal 10 — Kontak & Dukungan
+Jika kamu memiliki pertanyaan tentang Syarat & Ketentuan ini atau memerlukan bantuan terkait akun kamu, hubungi kami melalui:
+Email Dukungan
+support@hadir.in
+Jam Layanan
+Senin - Jumat, 09.00 - 18.00 WIB
+Waktu Respons
+Maksimal 2 x 24 jam kerja
+✅  Dengan Menggunakan hadir.in, Kamu Menyatakan Bahwa:
+• Kamu telah membaca dan memahami seluruh isi Syarat & Ketentuan ini.
+• Kamu setuju untuk mematuhi semua ketentuan yang berlaku.
+• Kamu bertanggung jawab penuh atas data peserta yang kamu kelola di platform ini.
+• Kamu memahami konsekuensi dari pelanggaran terhadap ketentuan ini.
+Terima kasih telah menggunakan hadir.in!
+Kami berkomitmen untuk terus meningkatkan layanan demi pengalaman event yang lebih baik.
