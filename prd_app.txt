@@ -1,0 +1,224 @@
+🚀 📱 MVP: Smart Event Attendance & Ticketing System
+🧠 Konsep Inti
+Sistem untuk:
+Absensi event berbasis QR di pintu masuk
+Ticketing (QR unik per peserta)
+Validasi real-time oleh panitia
+Monitoring oleh organizer
+👥 Role User
+1. Organizer (pakai Flutter App)
+Buat event
+Upload peserta
+Monitor attendance (real-time)
+2. Panitia (pakai Flutter App)
+Scan QR peserta
+Validasi tiket
+3. Peserta (pakai Web Flutter)
+Isi data / terdaftar
+Tampilkan QR saat datang
+✨ Fitur MVP (Fokus dulu, jangan overbuild)
+1. 🔐 Authentication (WAJIB)
+Login / Register
+JWT token
+Multi-event (banyak organizer)
+2. 🎫 Event & Ticketing
+Organizer:
+Create event
+Tentukan lokasi event
+Peserta:
+Data tersimpan di sistem
+Dapat QR unik
+3. 📥 Input Peserta
+✔ Manual input
+Tambah satu per satu
+✔ Bulk upload (CSV / Excel)
+Upload file
+Auto insert ke database
+Auto generate QR
+4. 🔳 QR Code System
+Setiap peserta punya:
+ticket_id (UUID)
+QR berisi:
+event_id + ticket_id
+5. 📷 QR Scanner (Panitia)
+Scan QR via Flutter
+Kirim ke backend
+Response:
+✅ Valid
+❌ Sudah digunakan
+❌ Tidak valid
+6. ⚡ Real-Time Attendance
+Menggunakan:
+Socket.io
+Fungsi:
+Update jumlah peserta masuk
+Dashboard organizer live
+7. 📍 Validasi Lokasi
+Ambil GPS saat scan
+Bandingkan dengan lokasi event
+Simpan ke database
+8. 📸 Bukti Absensi (Image / Video)
+Saat scan:
+Ambil foto (opsional video pendek)
+Upload ke backend
+Disimpan sebagai bukti
+👉 Ini fitur unik + powerful untuk portfolio
+9. 📊 Dashboard Organizer
+Di Flutter:
+Total peserta
+Sudah hadir
+Belum hadir
+List attendance
+🧩 Tech Stack (Sesuai Target Kamu)
+📱 Frontend
+Flutter (Mobile + Web)
+State: BLoC
+👉 Web peserta bisa pakai Flutter Web biar satu codebase
+🟩 Backend
+Node.js + Express
+JWT Auth
+REST API
+🟨 Database
+SQL (MySQL / PostgreSQL)
+🔴 Real-Time
+Socket.io
+🔄 Flow Utama Sistem
+🎯 Setup Event
+Organizer login
+Buat event
+Upload peserta (manual / bulk)
+Sistem generate QR
+🎟️ Hari H (Event)
+Peserta:
+Tunjukkan QR
+Panitia:
+Scan QR
+Sistem validasi
+Ambil:
+lokasi
+foto
+Status → “checked-in”
+📊 Organizer
+Lihat attendance real-time
+🗂️ Struktur Database (Simplified)
+users
+id
+name
+email
+password
+events
+id
+user_id (organizer)
+name
+location_lat
+location_lng
+date
+participants
+id
+event_id
+name
+email
+ticket_id (UUID)
+qr_code
+status (unused / used)
+attendance_logs
+id
+participant_id
+scanned_at
+latitude
+longitude
+photo_url
+video_url
+🧠 ERD (Entity Relationship Diagram)
+Relasi:
+1 user → banyak events
+1 event → banyak participants
+1 participant → 1 attendance log (MVP)
+⚙️ Endpoint API (High-Level)
+Auth
+POST /register
+POST /login
+Event
+POST /events
+GET /events
+Participant
+POST /participants (manual)
+POST /participants/bulk-upload
+QR Validation
+POST /scan→ return valid / invalid
+Attendance
+GET /attendance/event/:id
+🚀 MVP Scope (WAJIB DIBATASI)
+✅ Include:
+Auth JWT
+Create event
+Upload CSV
+Generate QR
+Scan QR
+Save attendance
+❌ Tunda dulu:
+Email automation
+Payment gateway
+Advanced analytics
+🔥 Kenapa Ini Project Bagus Banget
+Real use case (kampus, seminar, workshop)
+Ada:
+file processing
+QR system
+real-time
+maps
+media upload
+Bisa jalan walau user sedikit
+👉 Ini sudah portfolio level strong untuk mobile/backend engineer
+👉 Next Step
+Kalau kamu mau lanjut, aku sarankan:
+1️⃣ Desain database SQL (DDL siap pakai)
+atau
+2️⃣ Struktur project:
+Flutter (BLoC clean architecture)
+Node.js (MVC + service layer)
+atau bahkan:
+3️⃣ Flow detail scan QR (biar aman & tidak bisa dipalsukan)
+Tinggal bilang:👉 “lanjut database SQL”👉 “lanjut struktur project”
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Nama Produk: Smart Event Attendance and Ticketing System Fase Pembaruan: Minimum Viable Product (MVP) 
+1. Ringkasan Eksekutif Dokumen ini mendefinisikan spesifikasi fungsional dan teknis untuk Minimum Viable Product (MVP) dari Smart Event Attendance and Ticketing System. Sistem ini dirancang untuk memfasilitasi proses absensi acara berbasis pemindaian kode QR di pintu masuk, menyediakan tiket unik untuk setiap peserta, serta memungkinkan panitia melakukan validasi secara seketika (real-time). Selain itu, sistem ini menyediakan dasbor pemantauan langsung bagi pihak penyelenggara acara.
+2. Peran Pengguna (User Roles)
+Sistem ini memfasilitasi tiga jenis peran pengguna dengan tingkat akses dan fungsi yang berbeda:
+Penyelenggara (Organizer): Pengguna dengan hak akses administratif yang menggunakan aplikasi seluler berbasis Flutter. Penyelenggara bertugas membuat acara, mengunggah basis data peserta, dan memantau kehadiran secara real-time.
+Panitia (Committee/Staff): Pengguna operasional di lapangan yang menggunakan aplikasi seluler berbasis Flutter. Tugas utama panitia adalah memindai kode QR peserta dan memvalidasi keabsahan tiket di pintu masuk.
+Peserta (Participant): Pengguna akhir yang mengakses sistem melalui aplikasi berbasis web (Flutter Web). Peserta menggunakan platform ini untuk mendaftarkan diri, melengkapi data profil, dan menampilkan kode QR unik mereka saat menghadiri acara.
+3. Kebutuhan Fungsional (Functional Requirements)
+3.1. Modul Autentikasi dan Keamanan
+Sistem harus menyediakan fitur pendaftaran dan proses masuk (login) untuk pengelola acara.
+Sistem diwajibkan menggunakan standar JSON Web Token (JWT) untuk manajemen sesi pengguna dan keamanan akses otorisasi.
+Arsitektur sistem harus mendukung fungsionalitas multi-acara, yang memungkinkan berbagai penyelenggara berbeda untuk mengelola acara masing-masing dalam satu ekosistem sistem yang sama.
+3.2. Modul Manajemen Acara dan Tiket
+Penyelenggara memiliki kapabilitas untuk membuat entri acara baru dan menetapkan titik koordinat lokasi acara tersebut.
+Sistem akan menyimpan data peserta secara terpusat dan secara otomatis menghasilkan kode QR unik untuk setiap peserta yang terdaftar.
+3.3. Modul Manajemen Peserta
+Sistem harus memfasilitasi penambahan data peserta secara manual (satu per satu).
+Sistem harus mendukung fitur unggah massal menggunakan format file CSV atau Excel.
+Data yang diunggah akan secara otomatis dimasukkan ke dalam basis data, dan sistem akan langsung menghasilkan kode QR untuk setiap baris data peserta.
+3.4. Spesifikasi Sistem Kode QR
+Setiap entitas peserta akan diberikan pengenal tiket unik (ticket_id) yang menggunakan standar Universal Unique Identifier (UUID).
+Kompilasi data di dalam kode QR wajib memuat kombinasi dari identitas acara (event_id) dan identitas tiket (ticket_id).
+3.5. Modul Pemindaian dan Validasi
+Aplikasi panitia harus mampu mengaktifkan kamera perangkat untuk memindai kode QR dan mentransmisikan data tersebut ke server backend.
+Server harus mengembalikan salah satu dari tiga status respons: Valid (diterima), Sudah Digunakan (menolak tiket ganda), atau Tidak Valid (tiket tidak dikenali).
+Sistem pemindaian harus merekam koordinat GPS panitia pada saat pemindaian terjadi. Koordinat ini akan dikomparasi dengan koordinat lokasi acara yang telah ditentukan, lalu data komparasinya disimpan ke dalam basis data.
+Sebagai opsi keamanan tambahan, pada saat pemindaian berhasil, sistem akan menangkap bukti visual berupa foto (atau video pendek operasional) yang akan diunggah dan disimpan ke server sebagai bukti absensi yang sah.
+3.6. Dasbor Pemantauan Real-Time
+Aplikasi penyelenggara harus memiliki dasbor analitik yang disajikan secara real-time.
+Dasbor ini wajib menampilkan metrik utama yang meliputi: total peserta terdaftar, jumlah peserta yang telah hadir, jumlah peserta yang belum hadir, serta daftar log riwayat kedatangan peserta.
+Pembaruan data jumlah peserta yang masuk harus ditransmisikan secara langsung tanpa perlu menyegarkan halaman, menggunakan teknologi Socket.io.
+4. Spesifikasi Teknis (Technical Specifications)
+Platform Pengguna Lapis Depan (Frontend): Dikembangkan menggunakan framework Flutter, mengakomodasi kebutuhan aplikasi seluler dan juga aplikasi antarmuka web, dengan manajemen state memanfaatkan pola arsitektur BLoC.
+Platform Pengguna Lapis Belakang (Backend): Dibangun menggunakan bahasa pemrograman JavaScript berjalan di atas lingkungan Node.js dengan kerangka kerja Express.js. Komunikasi sistem mengimplementasikan arsitektur REST API dengan proteksi otentikasi JWT.
+Manajemen Basis Data: Menggunakan Relational Database Management System (RDBMS) berbasis SQL, dengan spesifikasi MySQL atau PostgreSQL.
+Protokol Komunikasi Seketika (Real-Time): Menggunakan pustaka Socket.io untuk menunjang sinkronisasi data seketika antara panitia dan penyelenggara.
+5. Batasan Ruang Lingkup MVP (Out of Scope)
+Untuk memastikan peluncuran MVP yang tepat waktu dan efisien, pengembangan tahap awal ini membatasi beberapa fungsionalitas. Fitur-fitur berikut tidak diikutsertakan pada fase rilis pertama:
+Sistem otomasi distribusi surat elektronik (Email automation).
+Integrasi gerbang pembayaran untuk pembelian tiket komersial (Payment gateway).
+Modul analitik data tingkat lanjut.

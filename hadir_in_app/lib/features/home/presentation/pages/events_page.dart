@@ -1,0 +1,307 @@
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../event/data/models/event_model.dart';
+import '../../../event/data/repositories/event_repository.dart';
+import '../widgets/event_card.dart';
+import '../widgets/status_chip.dart';
+
+class EventsPage extends StatefulWidget {
+  const EventsPage({super.key});
+
+  @override
+  State<EventsPage> createState() => _EventsPageState();
+}
+
+class _EventsPageState extends State<EventsPage> {
+  final _repo = GetIt.instance<EventRepository>();
+  late Future<List<EventModel>> _eventsFuture;
+  EventStatus? _selectedFilter; // null = semua
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    setState(() {
+      _eventsFuture = _repo.getMyEvents();
+    });
+    try {
+      await _eventsFuture;
+    } catch (_) {
+      // FutureBuilder will handle the error UI
+    }
+  }
+
+  List<EventModel> _applyFilter(List<EventModel> events) {
+    if (_selectedFilter == null) return events;
+    return events.where((e) => e.status == _selectedFilter).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: FutureBuilder<List<EventModel>>(
+                future: _eventsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildLoading();
+                  }
+                  if (snapshot.hasError) {
+                    return _buildError(snapshot.error.toString());
+                  }
+                  final all = snapshot.data ?? [];
+                  final filtered = _applyFilter(all);
+                  return _buildContent(all, filtered);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),
+      child: Row(
+        children: [
+          // ─── Logo badge ───
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppTheme.primary, AppTheme.primaryContainer],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Center(
+              child: Text(
+                'H',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'hadir.in',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(List<EventModel> all, List<EventModel> filtered) {
+    return RefreshIndicator(
+      color: AppTheme.primary,
+      onRefresh: _loadEvents,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(child: _buildSectionHeader(all)),
+          SliverToBoxAdapter(child: _buildFilterChips()),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)), // ← margin
+          if (filtered.isEmpty)
+            SliverFillRemaining(child: _buildEmpty())
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, i) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: EventCard(event: filtered[i]),
+                  ),
+                  childCount: filtered.length,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(List<EventModel> all) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Semua Event',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.textPrimary,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${all.length} event ditemukan',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: AppTheme.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChips() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 0, 0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            StatusChip(
+              label: 'Semua',
+              isSelected: _selectedFilter == null,
+              onTap: () => setState(() => _selectedFilter = null),
+            ),
+            const SizedBox(width: 8),
+            StatusChip(
+              label: 'Live',
+              isSelected: _selectedFilter == EventStatus.active,
+              onTap: () => setState(() => _selectedFilter = EventStatus.active),
+            ),
+            const SizedBox(width: 8),
+            StatusChip(
+              label: 'Upcoming',
+              isSelected: _selectedFilter == EventStatus.upcoming,
+              onTap: () =>
+                  setState(() => _selectedFilter = EventStatus.upcoming),
+            ),
+            const SizedBox(width: 8),
+            StatusChip(
+              label: 'Selesai',
+              isSelected: _selectedFilter == EventStatus.ended,
+              onTap: () => setState(() => _selectedFilter = EventStatus.ended),
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 100),
+      itemCount: 3,
+      itemBuilder: (_, __) => const Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: EventShimmerCard(),
+      ),
+    );
+  }
+
+  Widget _buildError(String error) {
+    final clean = error.replaceFirst('Exception: ', '');
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off_rounded, size: 48, color: AppTheme.textMuted),
+            const SizedBox(height: 16),
+            Text(
+              'Gagal memuat event',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              clean,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppTheme.textMuted,
+              ),
+            ),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: _loadEvents,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Coba lagi',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmpty() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🗓', style: TextStyle(fontSize: 48)),
+          const SizedBox(height: 16),
+          Text(
+            'Belum ada event nih',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Yuk bikin event pertamamu!',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: AppTheme.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

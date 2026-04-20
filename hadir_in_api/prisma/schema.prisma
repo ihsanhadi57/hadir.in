@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. Tabel Users
+model User {
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String
+  email            String   @unique
+  password         String
+  role             String   @default("organizer") // Isian: 'organizer' atau 'panitia'
+  emailQuota       Int      @default(50)   // Jatah kirim email (bertambah saat beli paket)
+  totalEmailsSent  Int      @default(0)    // Total email yang sudah pernah dikirim
+  avatarUrl        String?  // URL foto profil (diambil dari Google atau diisi upload)
+  createdAt        DateTime @default(now())
+
+  // Relasi
+  events      Event[]         @relation("OrganizerEvents")
+  scannedLogs AttendanceLog[] @relation("ScannedBy")
+  committees  EventCommittee[] // Events where user is panitia
+
+  @@map("users")
+}
+
+// 2. Tabel Events
+model Event {
+  id          String   @id @default(uuid()) @db.Uuid
+  organizerId String   @db.Uuid
+  name         String
+  description  String?  @db.Text
+  contactEmail String?  // Alamat email Reply-To milik Organizer
+  date         DateTime
+  latitude     Float?
+  longitude    Float?
+  ticketTemplateUrl String? // Path gambar statis template
+  ticketConfig      Json?   // JSON object berisi X, Y koordinat nama & QR
+  imageUrl     String?  // Gambar banner event (opsional)
+  inviteCode   String?  @unique // Kode rahasia unik untuk invite link panitia
+  createdAt    DateTime @default(now())
+
+  // Relasi
+  organizer   User            @relation("OrganizerEvents", fields: [organizerId], references: [id], onDelete: Cascade)
+  participants Participant[]
+  logs        AttendanceLog[]
+  committees  EventCommittee[] // List panitia yang tergabung
+
+  @@map("events")
+}
+
+// 2b. Tabel Event Committee (Panitia Undangan)
+model EventCommittee {
+  id        String   @id @default(uuid()) @db.Uuid
+  eventId   String   @db.Uuid
+  userId    String   @db.Uuid
+  role      String   @default("panitia") // Hak akses standar, view & scan
+  createdAt DateTime @default(now())
+
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId]) // 1 user hanya bisa gabung 1x di event yang sama
+  @@map("event_committees")
+}
+
+// 3. Tabel Participants
+model Participant {
+  id          String   @id @default(uuid()) @db.Uuid
+  eventId     String   @db.Uuid
+  name        String
+  email       String
+  ticketId    String   @unique @default(uuid()) @db.Uuid
+  noTelp      String?
+  status      String   @default("unused") // Isian: 'unused' atau 'used'
+  createdAt   DateTime @default(now())
+
+  // Relasi
+  event       Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  logs        AttendanceLog[]
+
+  // Composite Unique: 1 email hanya boleh daftar 1x di event yang sama
+  @@unique([email, eventId])
+  @@map("participants")
+}
+
+// 4. Tabel Attendance Logs
+model AttendanceLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  eventId       String   @db.Uuid
+  participantId String   @db.Uuid
+  scannedById   String?  @db.Uuid
+  scannedAt     DateTime @default(now())
+  latitude      Float?
+  longitude     Float?
+  photoUrl      String?
+  videoUrl      String?
+
+  // Relasi
+  event         Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  scannedBy     User?       @relation("ScannedBy", fields: [scannedById], references: [id])
+
+  @@map("attendance_logs")
+}

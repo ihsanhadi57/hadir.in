@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "115014454509",
+    "project_id": "hadir-in-app",
+    "storage_bucket": "hadir-in-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115014454509:android:01881ff54152045fad10e4",
+        "android_client_info": {
+          "package_name": "com.hadir_in_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "115014454509-pmpp5ish1cvrtn87shc8rcecmksbi7hg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hadir_in_app",
+            "certificate_hash": "8ed2db43b4f3ba6a31844cc876fceaa3e3be4da8"
+          }
+        },
+        {
+          "client_id": "115014454509-rv7ssl50u52i440c9vs3p9t54ak84sdn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCg-ar_vFOIcv1KTziEBB-vcrbuqnUFj2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "115014454509-rv7ssl50u52i440c9vs3p9t54ak84sdn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

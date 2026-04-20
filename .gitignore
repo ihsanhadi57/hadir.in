@@ -1,0 +1,33 @@
+# Root GitIgnore for Hadir.in Project
+
+# Backend
+hadir_in_api/node_modules/
+hadir_in_api/.env
+hadir_in_api/generated/
+hadir_in_api/uploads/
+hadir_in_api/*.png
+hadir_in_api/*.log
+
+# Frontend (Standard Flutter)
+hadir_in_app/.dart_tool/
+hadir_in_app/.flutter-plugins
+hadir_in_app/.flutter-plugins-dependencies
+hadir_in_app/.pub-cache/
+hadir_in_app/.pub/
+hadir_in_app/build/
+hadir_in_app/ios/Flutter/.last_build_id
+hadir_in_app/android/app/debug
+hadir_in_app/android/app/profile
+hadir_in_app/android/app/release
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.history
+
+# OS
+.DS_Store
+Thumbs.db
