@@ -16,15 +16,27 @@
 - **Self Check-in**: Peserta dapat melakukan absen secara mandiri dengan memindai QR di lokasi.
 - **Invitation System**: Undang panitia/volunteer ke event Anda dengan link unik.
 
+## 📷 App Showcase
+
+Berikut adalah tampilan antarmuka aplikasi Hadir.in saat ini (Tahap Pengembangan):
+
+<p align="center">
+  <img src="showcase.png" width="300" alt="Hadir.in Top-up UI">
+  <br>
+  <i>Tampilan Dialog Top-up Quota Email</i>
+</p>
+
 ## 🚀 Struktur Proyek
 
 Proyek ini menggunakan arsitektur Monorepo sederhana:
+
 - `/hadir_in_api`: Backend menggunakan Node.js, Express, dan Prisma ORM.
 - `/hadir_in_app`: Frontend Mobile menggunakan Flutter dengan BLoC state management.
 
 ## 🛠️ Stack Teknologi
 
 ### Backend (API)
+
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database**: PostgreSQL (Prisma ORM)
@@ -32,6 +44,7 @@ Proyek ini menggunakan arsitektur Monorepo sederhana:
 - **Mail Service**: Nodemailer (SMTP)
 
 ### Frontend (App)
+
 - **Framework**: Flutter (Dart)
 - **State Management**: BLoC (Business Logic Component)
 - **Network**: Dio
@@ -39,12 +52,14 @@ Proyek ini menggunakan arsitektur Monorepo sederhana:
 - **Theme**: Custom Modern UI Theme (Coral & Cream)
 
 ## 📋 Syarat & Ketentuan (T&C)
+
 Penting bagi seluruh Organizer untuk membaca dan memahami aturan penggunaan platform, terutama mengenai kebijakan kuota email dan data peserta.
 Detail lengkap dapat dibaca di: **[Syarat & Ketentuan Layanan (TERMS.md)](TERMS.md)**
 
 ## 🔧 Instalasi
 
 ### 1. Backend Setup
+
 ```bash
 cd hadir_in_api
 npm install
@@ -54,6 +69,7 @@ npm start
 ```
 
 ### 2. Frontend Setup
+
 ```bash
 cd hadir_in_app
 flutter pub get
@@ -63,4 +79,4 @@ flutter run
 
 ---
 
-Dibuat dengan ❤️ oleh **[Ihsan Hadi](https://github.com/ihsanhadi57)**
+Dibuat oleh **[Ihsan Hadi](https://github.com/ihsanhadi57)**
