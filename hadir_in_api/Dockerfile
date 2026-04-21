@@ -1,5 +1,5 @@
 # --- STAGE 1: Build ---
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Install library pendukung untuk 'sharp' (image processing) dan build tools
 RUN apk add --no-cache libc6-compat
@@ -23,7 +23,7 @@ RUN npx prisma generate
 # Untuk keamanan, kita lanjut ke stage berikutnya saja.
 
 # --- STAGE 2: Run ---
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 
 # Tentukan environment
 ENV NODE_ENV=production
