@@ -44,4 +44,4 @@ EXPOSE 4000
 # Script start:
 # 1. 'npx prisma migrate deploy' Sinkronisasi schema ke DB Cloud (Supabase/Neon/dll)
 # 2. 'npm start' Menjalankan server
-CMD npx prisma migrate deploy && npm start
+CMD ["npm", "start"]
