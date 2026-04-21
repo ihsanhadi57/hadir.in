@@ -167,7 +167,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
 /// Custom shape to draw a frame over the camera
 class QrScannerOverlayShape extends ShapeBorder {
   const QrScannerOverlayShape({
-    this.borderColor = Colors.blue,
+    this.borderColor = AppTheme.primary,
     this.borderWidth = 3.0,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 60),
     this.borderRadius = 0,

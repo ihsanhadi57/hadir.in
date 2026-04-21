@@ -118,11 +118,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             width: 88,
                             height: 88,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [AppTheme.primary, AppTheme.primaryContainer],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                              color: AppTheme.primary,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -325,11 +321,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       height: 54,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [AppTheme.primary, AppTheme.primaryContainer],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
+                          color: AppTheme.primary,
                           borderRadius: BorderRadius.circular(999),
                           boxShadow: [
                             BoxShadow(

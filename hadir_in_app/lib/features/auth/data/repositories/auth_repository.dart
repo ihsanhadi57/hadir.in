@@ -58,6 +58,26 @@ class AuthRepository {
     }
   }
 
+  // ─── Verify OTP ───
+  Future<UserModel> verifyOtp(String email, String otp) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/auth/verify-otp',
+        data: {'email': email, 'otp': otp},
+      );
+
+      final responseData = response.data['data'] as Map<String, dynamic>;
+      final token = responseData['token'] as String;
+      final userJson = responseData['user'] as Map<String, dynamic>;
+      final user = UserModel.fromJson(userJson);
+
+      await _storageService.saveAuthData(token, user.id);
+      return user;
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e, 'Verifikasi gagal. Pastikan kode benar.'));
+    }
+  }
+
   // ─── Login with Google ───
   Future<UserModel> loginWithGoogle() async {
     try {

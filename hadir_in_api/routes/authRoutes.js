@@ -12,6 +12,9 @@ router.post('/login', authController.login);
 // Route untuk login via Google
 router.post('/google', authController.googleLogin);
 
+// Route untuk verifikasi OTP
+router.post('/verify-otp', authController.verifyOTP);
+
 // ─── Protected Routes (butuh JWT) ───
 // Ambil profil user yang sedang login
 router.get('/me', authMiddleware, authController.getMe);

@@ -145,11 +145,7 @@ class _AccountPageState extends State<AccountPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryContainer],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppTheme.primary,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -279,11 +275,7 @@ class _AccountPageState extends State<AccountPage> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppTheme.primary, AppTheme.primaryContainer],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
+                    color: AppTheme.primary,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(

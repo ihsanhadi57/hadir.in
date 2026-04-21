@@ -40,11 +40,20 @@ class AuthRegisterSuccess extends AuthState {
   final String message;
 
   const AuthRegisterSuccess({
-    this.message = 'Registrasi berhasil! Silakan login.',
+    this.message = 'Registrasi berhasil! Silakan cek email Anda untuk kode OTP.',
   });
 
   @override
   List<Object?> get props => [message];
+}
+
+// State saat Verifikasi OTP berhasil
+class AuthOtpVerificationSuccess extends AuthState {
+  final UserModel user;
+  const AuthOtpVerificationSuccess({required this.user});
+
+  @override
+  List<Object?> get props => [user];
 }
 
 // State saat terjadi error (login gagal / register gagal)

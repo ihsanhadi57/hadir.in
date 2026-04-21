@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import 'otp_verification_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -80,7 +81,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
             );
-            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    OtpVerificationPage(email: _emailController.text.trim()),
+              ),
+            );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -152,17 +159,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 Icons.arrow_back_ios_new,
                 size: 16,
                 color: AppTheme.textPrimary,
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Text(
-              'Masuk',
-              style: GoogleFonts.plusJakartaSans(
-                color: AppTheme.primary,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
               ),
             ),
           ),
@@ -324,7 +320,9 @@ class _RegisterPageState extends State<RegisterPage> {
             height: 20,
             margin: const EdgeInsets.only(top: 2),
             decoration: BoxDecoration(
-              color: _agreeToTerms ? AppTheme.primary : AppTheme.surfaceContainerLow,
+              color: _agreeToTerms
+                  ? AppTheme.primary
+                  : AppTheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(6),
               border: _agreeToTerms
                   ? null
@@ -359,15 +357,11 @@ class _RegisterPageState extends State<RegisterPage> {
       width: double.infinity,
       height: 54,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryContainer],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppTheme.primary,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.15),
+            color: AppTheme.primary.withValues(alpha: 0.2),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

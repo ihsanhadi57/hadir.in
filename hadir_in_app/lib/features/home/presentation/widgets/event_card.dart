@@ -125,16 +125,11 @@ class EventCard extends StatelessWidget {
   }
 
   Widget _buildBanner() {
-    final colors = _bannerColors(event.status);
     return Container(
       height: 120,
       decoration: BoxDecoration(
-        gradient: event.imageUrl == null
-            ? LinearGradient(
-                colors: colors,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
+        color: event.imageUrl == null
+            ? _bannerColor(event.status)
             : null,
         image: event.imageUrl != null
             ? DecorationImage(
@@ -167,6 +162,17 @@ class EventCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _bannerColor(EventStatus status) {
+    switch (status) {
+      case EventStatus.active:
+        return AppTheme.primary;
+      case EventStatus.upcoming:
+        return const Color(0xFFD1D5DB);
+      case EventStatus.ended:
+        return const Color(0xFFE5E7EB);
+    }
   }
 
   Widget _buildProgress() {
@@ -217,22 +223,6 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  List<Color> _bannerColors(EventStatus status) {
-    switch (status) {
-      case EventStatus.active:
-        return [AppTheme.primary, AppTheme.primaryContainer];
-      case EventStatus.upcoming:
-        return [
-          const Color(0xFFE5E7EB),
-          const Color(0xFFD1D5DB),
-        ];
-      case EventStatus.ended:
-        return [
-          const Color(0xFFF3F4F6),
-          const Color(0xFFE5E7EB),
-        ];
-    }
-  }
 }
 
 class EventShimmerCard extends StatelessWidget {

@@ -1,7 +1,7 @@
 class ApiConfig {
-  // Centralized API configuration. 
+  // Centralized API configuration.
   // For production/Play Store, use your domain here.
-  static const String baseUrl = 'https://demise-genetics-devious.ngrok-free.dev';
-  
+  static const String baseUrl = 'http://192.168.1.9:4000';
+
   static const String apiUrl = '$baseUrl/api';
 }

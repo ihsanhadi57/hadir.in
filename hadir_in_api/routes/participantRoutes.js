@@ -10,6 +10,9 @@ const upload = multer({ dest: 'uploads/' });
 // Route publik (tanpa login) — Download template CSV
 router.get('/template/csv', participantController.downloadTemplate);
 
+// Route publik (tanpa login) — Unsubscribe dari email blast
+router.get('/unsubscribe', participantController.unsubscribe);
+
 // Semua rute peserta di bawah ini memerlukan login
 router.use(authMiddleware);
 

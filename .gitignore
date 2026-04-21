@@ -31,3 +31,4 @@ hadir_in_app/android/app/release
 # OS
 .DS_Store
 Thumbs.db
+splash.mp4

@@ -430,8 +430,8 @@ class _DesignTicketPageState extends State<DesignTicketPage> {
                               ),
                               decoration: BoxDecoration(
                                 color: _editMode == _EditMode.name
-                                    ? Colors.blue.withOpacity(0.5)
-                                    : Colors.blue.withOpacity(0.2),
+                                    ? AppTheme.primary.withOpacity(0.5)
+                                    : AppTheme.primary.withOpacity(0.2),
                                 border: Border.all(
                                   color: _editMode == _EditMode.name
                                       ? Colors.white

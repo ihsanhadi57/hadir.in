@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { cloudinary } = require('../config/cloudinary');
 
 const createEvent = async (req, res) => {
     try {
@@ -70,7 +71,7 @@ const getMyEvents = async (req, res) => {
 const uploadEventImage = async (req, res) => {
     try {
         const { eventId } = req.params;
-        
+
         if (!req.file) {
             return res.status(400).json({ status: "error", message: "File gambar tidak ditemukan." });
         }
@@ -85,7 +86,7 @@ const uploadEventImage = async (req, res) => {
 
         const updatedEvent = await prisma.event.update({
             where: { id: eventId },
-            data: { imageUrl: req.file.path.replace(/\\/g, '/') } // Simpan path dengan slash yang konsisten
+            data: { imageUrl: req.file.path } // req.file.path adalah URL Cloudinary
         });
 
         return res.status(200).json({
@@ -102,7 +103,7 @@ const uploadEventImage = async (req, res) => {
 const uploadTemplate = async (req, res) => {
     try {
         const { eventId } = req.params;
-        
+
         if (!req.file) {
             return res.status(400).json({ status: "error", message: "File gambar tidak ditemukan." });
         }
@@ -165,8 +166,8 @@ const getEventTemplate = async (req, res) => {
         const { eventId } = req.params;
 
         const event = await prisma.event.findFirst({
-            where: { 
-                id: eventId, 
+            where: {
+                id: eventId,
                 OR: [
                     { organizerId: req.user.id },
                     { committees: { some: { userId: req.user.id } } }
@@ -174,7 +175,7 @@ const getEventTemplate = async (req, res) => {
             },
             select: { ticketTemplateUrl: true, ticketConfig: true }
         });
-        
+
         if (!event) {
             return res.status(403).json({ status: 'error', message: 'Akses ditolak.' });
         }
@@ -182,9 +183,11 @@ const getEventTemplate = async (req, res) => {
         return res.status(200).json({
             status: 'success',
             data: {
-                // Convert local path (e.g. "uploads/templates/abc") to a public URL
+                // Jika sudah URL (Cloudinary), pakai langsung. Jika masih path lokal, tambahkan BASE_URL.
                 templateUrl: event.ticketTemplateUrl
-                    ? `${process.env.BASE_URL || 'http://localhost:3000'}/${event.ticketTemplateUrl.replace(/\\/g, '/')}`
+                    ? (event.ticketTemplateUrl.startsWith('http')
+                        ? event.ticketTemplateUrl
+                        : `${process.env.BASE_URL || 'http://localhost:3000'}/${event.ticketTemplateUrl.replace(/\\/g, '/')}`)
                     : null,
                 config: event.ticketConfig
             }
@@ -198,7 +201,7 @@ const getEventTemplate = async (req, res) => {
 const joinEvent = async (req, res) => {
     try {
         const { code } = req.params;
-        
+
         const event = await prisma.event.findUnique({
             where: { inviteCode: code }
         });
@@ -286,6 +289,24 @@ const deleteEvent = async (req, res) => {
             return res.status(403).json({ status: "error", message: "Anda tidak memiliki akses ke event ini." });
         }
 
+        // 1. Hapus semua file di Cloudinary yang terkait dengan event ini
+        const folders = [
+            `hadirin/events/${eventId}`,
+            `hadirin/attendance/${eventId}`
+        ];
+
+        for (const folder of folders) {
+            try {
+                // Hapus semua file dalam folder
+                await cloudinary.api.delete_resources_by_prefix(folder);
+                // Hapus foldernya (folder harus kosong dulu)
+                await cloudinary.api.delete_folder(folder).catch(() => { });
+            } catch (err) {
+                console.warn(`Gagal menghapus folder Cloudinary: ${folder}`, err.message);
+            }
+        }
+
+        // 2. Hapus dari Database (Cascade delete akan menghapus log & participant)
         await prisma.event.delete({ where: { id: eventId } });
 
         return res.status(200).json({

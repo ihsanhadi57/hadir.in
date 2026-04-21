@@ -8,8 +8,6 @@ import '../../presentation/bloc/auth_state.dart';
 import '../../presentation/pages/login_page.dart';
 import '../../../home/presentation/pages/home_page.dart';
 
-/// SplashPage — Screen pertama yang dibuka saat app launch.
-/// Tugasnya: periksa JWT di storage, lalu route ke Login atau Home.
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -21,8 +19,23 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // Trigger pengecekan token begitu widget selesai di-build
     context.read<AuthBloc>().add(AuthCheckRequested());
+  }
+
+  void _navigate(Widget page) {
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (context, anim, secondaryAnim) => page,
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: child,
+          );
+        },
+      ),
+      (route) => false,
+    );
   }
 
   @override
@@ -30,78 +43,49 @@ class _SplashPageState extends State<SplashPage> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
-          // Token ada & valid → langsung ke Home, hapus semua route sebelumnya
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const HomePage()),
-            (route) => false,
-          );
+          _navigate(const HomePage());
         } else if (state is AuthUnauthenticated) {
-          // Token tidak ada → ke Login
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const LoginPage()),
-            (route) => false,
-          );
+          _navigate(const LoginPage());
         }
       },
       child: Scaffold(
-        backgroundColor: AppTheme.background,
+        backgroundColor: AppTheme.primary,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // ─── Logo ───
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      AppTheme.primary,
-                      AppTheme.primaryContainer,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: Text(
-                    'H',
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
+              // Logo
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Brand name
               Text(
                 'hadir.in',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
+                  color: Colors.white,
                   letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 40),
-              // ─── Loading Indicator ───
+
+              const SizedBox(height: 48),
+
+              // Loading indicator
               SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: AppTheme.primary.withValues(alpha: 0.6),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],

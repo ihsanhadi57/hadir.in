@@ -82,21 +82,20 @@ class _EventsPageState extends State<EventsPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.primary, AppTheme.primaryContainer],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Center(
-              child: Text(
-                'H',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                fit: BoxFit.cover,
               ),
             ),
           ),

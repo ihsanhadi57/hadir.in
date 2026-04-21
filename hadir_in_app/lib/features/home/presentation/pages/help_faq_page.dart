@@ -101,11 +101,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.primaryContainer],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: AppTheme.primary,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -219,11 +215,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 12),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppTheme.primary, AppTheme.primaryContainer],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
+                      color: AppTheme.primary,
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(

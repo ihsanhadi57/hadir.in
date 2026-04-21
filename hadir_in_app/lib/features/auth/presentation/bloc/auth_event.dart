@@ -61,3 +61,14 @@ class UpdateProfileRequested extends AuthEvent {
 
 // Event untuk refresh data profil dari server (setelah login via token)
 class FetchProfileRequested extends AuthEvent {}
+
+// Event untuk verifikasi OTP
+class VerifyOtpRequested extends AuthEvent {
+  final String email;
+  final String otp;
+
+  const VerifyOtpRequested({required this.email, required this.otp});
+
+  @override
+  List<Object?> get props => [email, otp];
+}

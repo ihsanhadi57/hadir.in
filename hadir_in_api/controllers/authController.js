@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
+const emailService = require('../services/emailService');
 
 const googleClient = new OAuth2Client();
 
@@ -30,15 +31,27 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Generate OTP
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 menit
+
         const newUser = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
                 role: role || 'organizer',
-                emailQuota: 50,
+                emailQuota: 0, // 0 until verified
                 totalEmailsSent: 0,
+                isVerified: false,
+                otpCode,
+                otpExpires
             }
+        });
+
+        // Kirim OTP via Email
+        await emailService.sendOTPEmail(email, otpCode).catch(err => {
+            console.error("Gagal kirim OTP saat registrasi:", err.message);
         });
 
         return res.status(201).json({
@@ -75,7 +88,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET || 'rahasia_super_aman_jwt_123',
-            { expiresIn: '7d' }
+            { expiresIn: '30d' }
         );
 
         return res.status(200).json({
@@ -126,9 +139,10 @@ const googleLogin = async (req, res) => {
                     email,
                     password: hashedPassword,
                     role: 'organizer',
-                    emailQuota: 50,
+                    emailQuota: 50, // Google login is pre-verified
                     totalEmailsSent: 0,
-                    avatarUrl: picture, // Simpan foto awal
+                    avatarUrl: picture,
+                    isVerified: true, // Google accounts are verified
                 }
             });
         } else {
@@ -144,7 +158,7 @@ const googleLogin = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET || 'secret_jwt_key',
-            { expiresIn: '7d' }
+            { expiresIn: '30d' }
         );
 
         return res.status(200).json({
@@ -231,10 +245,71 @@ const updateProfile = async (req, res) => {
     }
 };
 
+const verifyOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({ status: "error", message: "Email dan kode OTP wajib diisi." });
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+            return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ status: "error", message: "Akun sudah terverifikasi." });
+        }
+
+        // Cek OTP & Expiry
+        if (user.otpCode !== otp) {
+            return res.status(400).json({ status: "error", message: "Kode OTP salah." });
+        }
+
+        if (user.otpExpires < new Date()) {
+            return res.status(400).json({ status: "error", message: "Kode OTP sudah kadaluarsa. Silakan request kode baru." });
+        }
+
+        // Verifikasi Akun & Kasih Quota
+        const updatedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                isVerified: true,
+                emailQuota: 50, // Kuota awal bonus verifikasi
+                otpCode: null,
+                otpExpires: null
+            }
+        });
+
+        // Generate Token Baru agar user bisa langsung masuk
+        const token = jwt.sign(
+            { id: updatedUser.id, email: updatedUser.email, role: updatedUser.role },
+            process.env.JWT_SECRET || 'rahasia_super_aman_jwt_123',
+            { expiresIn: '30d' }
+        );
+
+        return res.status(200).json({
+            status: "success",
+            message: "Akun berhasil diverifikasi! Selamat datang.",
+            data: {
+                user: sanitizeUser(updatedUser),
+                token
+            }
+        });
+
+    } catch (error) {
+        console.error("Error di verifyOTP:", error);
+        return res.status(500).json({ status: "error", message: "Gagal verifikasi OTP." });
+    }
+};
+
 module.exports = {
     register,
     login,
     googleLogin,
     getMe,
     updateProfile,
+    verifyOTP,
 };

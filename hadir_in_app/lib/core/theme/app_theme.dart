@@ -13,10 +13,10 @@ class AppTheme {
   static const Color surfaceContainerHigh = Color(0xFFE5E7EB); // For recessed areas / inputs
   
   // ─── Accent & Branding ───
-  static const Color primary = Color(0xFF004AC6);
-  static const Color primaryContainer = Color(0xFF2563EB);
-  static const Color inverseSurface = Color(0xFF141B2B); // Dark badge bg
-  static const Color inverseOnSurface = Color(0xFFFFFFFF); // Dark badge text
+  static const Color primary = Color(0xFF002766); // Deep Navy
+  static const Color primaryContainer = Color(0xFFFF6F61); // Vibrant Coral
+  static const Color inverseSurface = Color(0xFF0F172A); // Even darker Navy
+  static const Color inverseOnSurface = Color(0xFFFFFFFF);
 
   // ─── Text & Ink ───
   static const Color textPrimary = Color(0xFF141B2B); // on-surface
@@ -104,7 +104,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0x33004AC6), width: 2), // Ghost border 20%
+          borderSide: const BorderSide(color: Color(0x66002766), width: 2), // Ghost Navy
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),

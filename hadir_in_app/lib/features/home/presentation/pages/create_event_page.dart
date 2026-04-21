@@ -176,7 +176,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
           );
           if (!mounted) return;
           _showSnackBar(
-            'Event dibuat & peserta berhasil diimpor! 🎉',
+            'Event dibuat & peserta berhasil diimpor!',
             AppTheme.success,
           );
         } catch (bulkError) {
@@ -477,10 +477,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
             ),
           ),
           const SizedBox(height: 16),
-
-          // LOCATION VENUE
-          _buildFieldLabel('LOKASI VENUE'),
-          const SizedBox(height: 6),
           TextFormField(
             controller: _venueController,
             style: GoogleFonts.plusJakartaSans(
@@ -982,11 +978,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       width: double.infinity,
       height: 54,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryContainer],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
+        color: AppTheme.primary,
         borderRadius: BorderRadius.circular(999),
         boxShadow: [
           BoxShadow(

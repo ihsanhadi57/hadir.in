@@ -4,8 +4,10 @@ const multer = require('multer');
 const eventController = require('../controllers/eventController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-const uploadTemplate = multer({ dest: 'uploads/templates/' });
-const uploadEventImage = multer({ dest: 'uploads/events/' });
+const { eventStorage } = require('../config/cloudinary');
+
+const uploadTemplate = multer({ storage: eventStorage });
+const uploadEventImage = multer({ storage: eventStorage });
 
 // Semua rute event memerlukan login
 router.use(authMiddleware);

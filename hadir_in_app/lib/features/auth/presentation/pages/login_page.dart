@@ -118,35 +118,21 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         // ─── Logo Badge ───
         Container(
-          width: 64,
-          height: 64,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                AppTheme.primary,
-                AppTheme.primaryContainer,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primary.withValues(alpha: 0.15),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: const Center(
-            child: Text(
-              'H',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
           ),
         ),
         const SizedBox(height: 16),
@@ -179,14 +165,14 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             Center(
               child: Text(
-                'Halo lagi! 👋',
+                'Sudah siap?',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             const SizedBox(height: 6),
             Center(
               child: Text(
-                'Masuk dulu, baru gas.',
+                'Masuk dulu, yuk!',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -222,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                 GestureDetector(
                   onTap: () {}, // TODO: Forgot Password
                   child: Text(
-                    'Lupa sandi? 😬',
+                    'Lupa sandi?',
                     style: GoogleFonts.plusJakartaSans(
                       color: AppTheme.primary,
                       fontSize: 12,
@@ -267,11 +253,7 @@ class _LoginPageState extends State<LoginPage> {
             // ─── Divider ───
             Row(
               children: [
-                Expanded(
-                  child: Divider(
-                    color: AppTheme.surfaceContainerHigh,
-                  ),
-                ),
+                Expanded(child: Divider(color: AppTheme.surfaceContainerHigh)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
@@ -282,11 +264,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Divider(
-                    color: AppTheme.surfaceContainerHigh,
-                  ),
-                ),
+                Expanded(child: Divider(color: AppTheme.surfaceContainerHigh)),
               ],
             ),
             const SizedBox(height: 20),
@@ -312,15 +290,11 @@ class _LoginPageState extends State<LoginPage> {
       width: double.infinity,
       height: 54,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryContainer],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppTheme.primary,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.15),
+            color: AppTheme.primary.withValues(alpha: 0.2),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

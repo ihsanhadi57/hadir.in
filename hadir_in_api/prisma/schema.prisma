@@ -22,6 +22,9 @@ model User {
   emailQuota       Int      @default(50)   // Jatah kirim email (bertambah saat beli paket)
   totalEmailsSent  Int      @default(0)    // Total email yang sudah pernah dikirim
   avatarUrl        String?  // URL foto profil (diambil dari Google atau diisi upload)
+  isVerified       Boolean  @default(false) // Mencegah abuse quota
+  otpCode          String?  // Kode 6 angka sementara
+  otpExpires       DateTime? // Kadaluarsa OTP
   createdAt        DateTime @default(now())
 
   // Relasi
@@ -82,6 +85,7 @@ model Participant {
   ticketId    String   @unique @default(uuid()) @db.Uuid
   noTelp      String?
   status      String   @default("unused") // Isian: 'unused' atau 'used'
+  unsubscribed Boolean @default(false)
   createdAt   DateTime @default(now())
 
   // Relasi

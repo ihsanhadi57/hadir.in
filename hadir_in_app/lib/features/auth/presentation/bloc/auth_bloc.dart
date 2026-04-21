@@ -13,6 +13,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<UpdateProfileRequested>(_onUpdateProfileRequested);
+    on<VerifyOtpRequested>(_onVerifyOtpRequested);
     on<LogoutRequested>(_onLogoutRequested);
   }
 
@@ -26,12 +27,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (result.isLoggedIn && result.userId != null) {
       // Emit authenticated dulu, kemudian fetch profil lengkap
       emit(AuthAuthenticated(userId: result.userId!));
-      // Fetch real user data in the background
       try {
         final user = await authRepository.getMe();
         emit(AuthAuthenticated(userId: user.id, user: user));
       } catch (_) {
-        // Tetap authenticated walaupun gagal fetch profil
+        // Jika gagal ambil profil, berarti token sudah tidak valid (misal: pindah DB)
+        // Hapus token dan lempar ke Unauthenticated (Login)
+        await authRepository.logout();
+        emit(AuthUnauthenticated());
       }
     } else {
       emit(AuthUnauthenticated());
@@ -108,6 +111,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthProfileUpdateSuccess(user: updatedUser));
       // Re-emit authenticated state dengan data terbaru
       emit(AuthAuthenticated(userId: updatedUser.id, user: updatedUser));
+    } on Exception catch (e) {
+      emit(AuthFailure(message: e.toString().replaceFirst('Exception: ', '')));
+    }
+  }
+
+  // ─── Verifikasi OTP ───
+  Future<void> _onVerifyOtpRequested(
+    VerifyOtpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final user = await authRepository.verifyOtp(event.email, event.otp);
+      emit(AuthOtpVerificationSuccess(user: user));
+      // Re-emit authenticated state agar app langsung masuk ke home
+      emit(AuthAuthenticated(userId: user.id, user: user));
     } on Exception catch (e) {
       emit(AuthFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }

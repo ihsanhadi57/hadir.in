@@ -68,7 +68,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFF2563EB),
+                        color: AppTheme.primary,
                       ),
                     ); // Blue loading
                   }
@@ -93,7 +93,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
                   return RefreshIndicator(
                     onRefresh: () async => _refresh(),
-                    color: const Color(0xFF2563EB),
+                    color: AppTheme.primary,
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -185,7 +185,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             child: const Icon(
               Icons.arrow_back_rounded,
               size: 24,
-              color: Color(0xFF2563EB),
+              color: AppTheme.primary,
             ),
           ),
           const SizedBox(width: 16),
@@ -194,7 +194,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF2563EB),
+              color: AppTheme.primary,
             ),
           ),
           const Spacer(),
@@ -230,7 +230,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         child: const Icon(
                           Icons.person_add_alt_1_rounded,
                           size: 20,
-                          color: Color(0xFF2563EB),
+                          color: AppTheme.primary,
                         ),
                       ),
                     ),
@@ -244,7 +244,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         child: const Icon(
                           Icons.more_vert_rounded,
                           size: 20,
-                          color: Color(0xFF2563EB),
+                          color: AppTheme.primary,
                         ),
                       ),
                       shape: RoundedRectangleBorder(
@@ -262,7 +262,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               const Icon(
                                 Icons.edit_rounded,
                                 size: 18,
-                                color: Color(0xFF2563EB),
+                                color: AppTheme.primary,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -318,7 +318,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF2563EB),
+                color: AppTheme.primary,
                 letterSpacing: 1.5,
               ),
             ),
@@ -336,7 +336,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+                  color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -346,7 +346,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       width: 6,
                       height: 6,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF2563EB),
+                        color: AppTheme.primary,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -356,7 +356,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF2563EB),
+                        color: AppTheme.primary,
                       ),
                     ),
                   ],
@@ -405,7 +405,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   ? Icons.location_on_rounded
                   : Icons.location_off_rounded,
               color: hasLocation
-                  ? const Color(0xFF2563EB)
+                  ? AppTheme.primary
                   : const Color(0xFF9CA3AF),
               size: 20,
             ),
@@ -479,7 +479,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF2563EB),
+                    color: AppTheme.primary,
                   ),
                 ),
               ),
@@ -494,11 +494,11 @@ class _EventDetailPageState extends State<EventDetailPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF2563EB), // Solid blue
+        color: AppTheme.primary, // Solid blue
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+            color: AppTheme.primary.withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -635,7 +635,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   const Icon(
                     Icons.sensors_rounded,
                     size: 14,
-                    color: Color(0xFF2563EB),
+                    color: AppTheme.primary,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -643,7 +643,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF2563EB),
+                      color: AppTheme.primary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -694,7 +694,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF2563EB),
+                    color: AppTheme.primary,
                   ),
                 ),
               ),
@@ -795,7 +795,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         const Icon(
                           Icons.location_on_rounded,
                           size: 10,
-                          color: Color(0xFF2563EB),
+                          color: AppTheme.primary,
                         ),
                         const SizedBox(width: 2),
                         Text(
@@ -803,7 +803,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF2563EB),
+                            color: AppTheme.primary,
                           ),
                         ),
                       ],
@@ -822,7 +822,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: isJustNow
-                        ? const Color(0xFF2563EB)
+                        ? AppTheme.primary
                         : const Color(0xFF6B7280),
                   ),
                 ),
@@ -1231,6 +1231,13 @@ class _EventDetailPageState extends State<EventDetailPage> {
     if (result == null) return;
     if (!mounted) return;
 
+    final targetCount = result['isPartial'] == true 
+        ? ((result['end'] as int) - (result['start'] as int) + 1)
+        : participants.length;
+
+    final agreed = await _showBlastWarning(targetCount);
+    if (agreed != true || !mounted) return;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1293,7 +1300,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
               : CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: const Color(0xFF2563EB), size: 24),
+            Icon(icon, color: AppTheme.primary, size: 24),
             const SizedBox(height: 12),
             Text(
               label,
@@ -2017,7 +2024,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 color: const Color(0xFFEEF2FF),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: const Color(0xFF2563EB)),
+              child: Icon(icon, color: AppTheme.primary),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -2046,6 +2053,76 @@ class _EventDetailPageState extends State<EventDetailPage> {
             const Icon(Icons.chevron_right_rounded, color: Color(0xFF9CA3AF)),
           ],
         ),
+      ),
+    );
+  }
+
+  // --- DIALOG FOR T&C BLAST ---
+  Future<bool?> _showBlastWarning(int targetCount) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.campaign_rounded, size: 48, color: AppTheme.primary),
+            const SizedBox(height: 16),
+            Text(
+              'Kirim $targetCount Tiket?',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Pastikan data peserta sudah benar. Email tidak valid akan menghanguskan kredit tanpa refund.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    style: OutlinedButton.styleFrom(
+                      shape: StadiumBorder(),
+                    ),
+                    child: const Text('Batal'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary, 
+                      foregroundColor: Colors.white,
+                      shape: StadiumBorder(),
+                    ),
+                    child: const Text('Kirim', textAlign: TextAlign.center),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCheckmarkRule(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.check_circle_rounded, size: 16, color: Colors.green),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted))),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { cloudinary } = require('../config/cloudinary');
 
 const scanTicket = async (req, res) => {
     try {
@@ -204,8 +205,8 @@ const selfCheckIn = async (req, res) => {
         let photoUrl = null;
 
         if (req.file) {
-            // Asumsi file disimpan lokal atau diubah sesuaikan setup multer
-            photoUrl = `uploads/attendance/${req.file.filename}`;
+            // req.file.path adalah URL Cloudinary yang sudah diproses oleh multer-storage-cloudinary
+            photoUrl = req.file.path;
         }
 
         // Cek apakah peserta dengan email yang sama ada di event
@@ -301,7 +302,7 @@ const renderSelfCheckInPage = async (req, res) => {
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8F9FE; }
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .btn-primary { background: #2563EB; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); transition: all 0.2s; }
+        .btn-primary { background: #002766; box-shadow: 0 4px 12px rgba(0, 39, 102, 0.2); transition: all 0.2s; }
         .btn-primary:active { transform: scale(0.98); }
         .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
         .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
@@ -316,8 +317,8 @@ const renderSelfCheckInPage = async (req, res) => {
     <div class="w-full max-w-md">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-[#111827] tracking-tight mb-2">hadir.in</h1>
-            <div class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full uppercase tracking-wider">
+            <h1 class="text-3xl font-extrabold text-[#002766] tracking-tight mb-2">hadir.in</h1>
+            <div class="inline-flex items-center px-3 py-1 bg-blue-50 text-[#002766] text-xs font-bold rounded-full uppercase tracking-wider">
                 Self Check-in
             </div>
         </div>
@@ -343,7 +344,7 @@ const renderSelfCheckInPage = async (req, res) => {
             <!-- Step 1: Location -->
             <div id="location-section" class="p-4 rounded-2xl bg-blue-50 border border-blue-100">
                 <div class="flex items-center gap-4">
-                    <div id="loc-icon" class="w-10 h-10 bg-blue-200 text-blue-600 rounded-xl flex items-center justify-center">
+                    <div id="loc-icon" class="w-10 h-10 bg-blue-200 text-[#002766] rounded-xl flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -353,7 +354,7 @@ const renderSelfCheckInPage = async (req, res) => {
                         <p id="loc-title" class="text-sm font-bold text-gray-900">Mendeteksi Lokasi...</p>
                         <p id="loc-status" class="text-xs text-gray-500">Mohon izinkan akses GPS</p>
                     </div>
-                    <button id="retry-loc" class="hidden p-2 text-blue-600 hover:bg-blue-100 rounded-lg">
+                    <button id="retry-loc" class="hidden p-2 text-[#002766] hover:bg-blue-100 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
                         </svg>
@@ -434,7 +435,7 @@ const renderSelfCheckInPage = async (req, res) => {
             }
             locTitle.innerText = "Mendeteksi Lokasi...";
             locStatus.innerText = "Mohon izinkan akses GPS";
-            locIcon.className = "w-10 h-10 bg-blue-200 text-blue-600 rounded-xl flex items-center justify-center shimmer";
+            locIcon.className = "w-10 h-10 bg-blue-200 text-[#002766] rounded-xl flex items-center justify-center shimmer";
             retryLoc.classList.add('hidden');
 
             if (!navigator.geolocation) {
@@ -625,13 +626,13 @@ const deleteLog = async (req, res) => {
         await prisma.attendanceLog.delete({
             where: { id: logId }
         });
-        
+
         // (Opsional) Mengubah status partisipan menjadi unused jika ini adalah satu-satunya log untuk partisipan. 
         // Untuk amannya, kita set unused jika ingin partisipan bisa scan lagi.
         await prisma.participant.update({
             where: { id: log.participantId },
             data: { status: 'unused' }
-        }).catch(() => {});
+        }).catch(() => { });
 
         return res.status(200).json({
             status: "success",

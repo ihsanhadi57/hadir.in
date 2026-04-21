@@ -19,6 +19,7 @@ const participantRoutes = require('./routes/participantRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const systemRoutes = require('./routes/systemRoutes');
 const attendanceController = require('./controllers/attendanceController');
 
 // Route Sederhana untuk Testing
@@ -86,6 +87,7 @@ app.use('/api/participants', participantRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/system', systemRoutes);
 
 // Menjalankan Server
 const PORT = process.env.PORT || 4000;

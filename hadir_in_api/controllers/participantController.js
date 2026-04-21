@@ -5,6 +5,9 @@ const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
 const { Jimp } = require('jimp');
 const sharp = require('sharp');
+const jwt = require('jsonwebtoken');
+const emailService = require('../services/emailService');
+const { isValidEmailFormat, fixEmailTypo, hasValidMxRecord } = require('../utils/emailValidator');
 
 const registerManual = async (req, res) => {
     try {
@@ -32,13 +35,13 @@ const registerManual = async (req, res) => {
             });
         }
 
+        let finalEmail = fixEmailTypo(email);
+        if (!isValidEmailFormat(finalEmail)) {
+            return res.status(400).json({ status: "error", message: "Format email tidak valid." });
+        }
+
         const participant = await prisma.participant.create({
-            data: {
-                eventId,
-                name,
-                email,
-                noTelp
-            }
+            data: { eventId, name, email: finalEmail, noTelp }
         });
 
         return res.status(201).json({
@@ -97,7 +100,7 @@ const registerBulk = async (req, res) => {
         }
 
         const results = [];
-        
+
         // Baca file, bersihkan BOM dan baris "sep=," agar csv-parser tidak bingung
         let rawContent = fs.readFileSync(req.file.path, 'utf-8');
         // Hapus BOM jika ada
@@ -110,14 +113,17 @@ const registerBulk = async (req, res) => {
         fs.createReadStream(req.file.path)
             .pipe(csv())
             .on('data', (data) => {
-                // Skip baris kosong / tanpa name & email
                 if (data.name && data.email) {
-                    results.push({
-                        eventId,
-                        name: data.name.trim(),
-                        email: data.email.trim(),
-                        noTelp: data.noTelp ? data.noTelp.trim() : null
-                    });
+                    let cleanedEmail = data.email.trim();
+                    cleanedEmail = fixEmailTypo(cleanedEmail);
+                    if (isValidEmailFormat(cleanedEmail)) {
+                        results.push({
+                            eventId,
+                            name: data.name.trim(),
+                            email: cleanedEmail,
+                            noTelp: data.noTelp ? data.noTelp.trim() : null
+                        });
+                    }
                 }
             })
             .on('end', async () => {
@@ -228,11 +234,19 @@ const updateParticipant = async (req, res) => {
             return res.status(403).json({ status: "error", message: "Anda tidak memiliki akses." });
         }
 
+        let finalEmail = email;
+        if (email) {
+            finalEmail = fixEmailTypo(email);
+            if (!isValidEmailFormat(finalEmail)) {
+                return res.status(400).json({ status: "error", message: "Format email tidak valid." });
+            }
+        }
+
         const updated = await prisma.participant.update({
             where: { id },
             data: {
                 ...(name && { name }),
-                ...(email && { email }),
+                ...(email && { email: finalEmail }),
                 ...(noTelp !== undefined && { noTelp: noTelp || null }),
             }
         });
@@ -302,14 +316,16 @@ const sendTicket = async (req, res) => {
         const event = participant.event;
         const p = participant;
 
-        res.status(200).json({ status: "success", message: `Tiket sedang dikirim ke ${p.email}` });
+        if (p.unsubscribed) {
+            return res.status(400).json({ status: "error", message: "Peserta ini telah memilih berhenti berlangganan (Unsubscribed)." });
+        }
 
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 465,
-            secure: true,
-            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-        });
+        const isValidMx = await hasValidMxRecord(p.email);
+        if (!isValidMx) {
+            return res.status(400).json({ status: "error", message: "Domain email tujuan tidak valid atau tidak memiliki mail server aktif (Invalid MX Record)." });
+        }
+
+        res.status(200).json({ status: "success", message: `Tiket sedang dikirim ke ${p.email}` });
 
         const qrBuffer = await QRCode.toBuffer(p.ticketId, {
             errorCorrectionLevel: 'H', margin: 2,
@@ -343,31 +359,12 @@ const sendTicket = async (req, res) => {
             }
         }
 
-        const mailOptions = {
-            from: `"${event.name} via Hadir.in" <${process.env.SMTP_USER}>`,
-            replyTo: event.contactEmail || process.env.SMTP_USER,
-            to: p.email,
-            subject: `E-Ticket Resmi: ${event.name}`,
-            html: `
-                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E5E7EB; border-radius: 16px; background-color: #ffffff;">
-                    <div style="text-align: center; border-bottom: 1px solid #E5E7EB; padding-bottom: 20px;">
-                        <h1 style="color: #004AC6; margin: 0; font-size: 24px;">Hadir.in E-Ticket</h1>
-                    </div>
-                    <div style="padding: 20px 0; text-align: center;">
-                        <h2 style="color: #111827; margin-bottom: 8px;">Halo, ${p.name}!</h2>
-                        <p style="color: #4B5563; line-height: 1.5; margin-bottom: 24px;">Berikut adalah E-Ticket Anda untuk acara <strong>${event.name}</strong>.</p>
-                        <img src="cid:qr_${p.ticketId}@hadir.in" alt="E-Ticket" style="width: 100%; max-width: 400px; border: 1px solid #E5E7EB; border-radius: 12px;"/>
-                        <div style="margin-top: 24px; padding: 12px; background-color: #F9FAFB; border-radius: 8px; display: inline-block;">
-                            <p style="margin: 0; font-size: 12px; color: #6B7280;">TICKET ID</p>
-                            <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 16px; font-weight: bold; color: #111827;">${p.ticketId}</p>
-                        </div>
-                    </div>
-                </div>
-            `,
-            attachments: [{ filename: 'e-ticket.png', content: finalImageBuffer, cid: `qr_${p.ticketId}@hadir.in` }]
-        };
+        // Buat token unsubscribe
+        const unsubToken = jwt.sign({ participantId: p.id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '30d' });
+        const unsubscribeUrl = `${process.env.BASE_URL}/api/participants/unsubscribe?token=${unsubToken}`;
 
-        transporter.sendMail(mailOptions).catch(err => console.error("SMTP Error for", p.email, err));
+        // Using AWS SES Service
+        await emailService.sendTicketEmail(p, event, finalImageBuffer, unsubscribeUrl);
     } catch (error) {
         console.error("Error sendTicket:", error);
     }
@@ -380,10 +377,10 @@ const blastTickets = async (req, res) => {
 
         const event = await prisma.event.findFirst({
             where: { id: eventId, organizerId: req.user.id },
-            include: { 
+            include: {
                 participants: {
                     orderBy: { createdAt: 'desc' }
-                } 
+                }
             }
         });
 
@@ -422,10 +419,9 @@ const blastTickets = async (req, res) => {
             });
         }
 
-        // Return early untuk UX responsif (proses berjalan di background)
         res.status(200).json({
             status: "success",
-            message: `Proses pengiriman ${needed} tiket sedang berjalan di latar belakang.`
+            message: `Proses pengiriman tiket sedang berjalan di latar belakang dan membutuhkan waktu beberapa saat.`
         });
 
         // ─── Kurangi Quota & Tambah Counter (Optimistic, sebelum send) ───
@@ -437,17 +433,7 @@ const blastTickets = async (req, res) => {
             }
         });
 
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT) || 465,
-            secure: true,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            }
-        });
-
-        // Loop over target participants and send asynchronously
+        // Loop over target participants and send asynchronously via AWS SES
         for (const p of targetParticipants) {
             const qrBuffer = await QRCode.toBuffer(p.ticketId, {
                 errorCorrectionLevel: 'H',
@@ -483,81 +469,80 @@ const blastTickets = async (req, res) => {
                 }
             }
 
-            const mailOptions = {
-                from: `"${event.name} via Hadir.in" <${process.env.SMTP_USER}>`,
-                replyTo: event.contactEmail || process.env.SMTP_USER,
-                to: p.email,
-                subject: `E-Ticket Resmi: ${event.name}`,
-                html: `
-                    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E5E7EB; border-radius: 16px; background-color: #ffffff;">
-                        <div style="text-align: center; border-bottom: 1px solid #E5E7EB; padding-bottom: 20px;">
-                            <h1 style="color: #004AC6; margin: 0; font-size: 24px;">Hadir.in E-Ticket</h1>
-                            <p style="color: #6B7280; margin-top: 4px; font-size: 14px;">The Digital Concierge</p>
-                        </div>
-                        <div style="padding: 20px 0; text-align: center;">
-                            <h2 style="color: #111827; margin-bottom: 8px;">Halo, ${p.name}!</h2>
-                            <p style="color: #4B5563; line-height: 1.5; margin-bottom: 24px;">Berikut adalah E-Ticket Anda untuk acara <strong>${event.name}</strong>. Harap simpan gambar di bawah ini dan tunjukkan kepada panitia saat kedatangan.</p>
-                            <img src="cid:qr_${p.ticketId}@hadir.in" alt="E-Ticket" style="width: 100%; max-width: 400px; border: 1px solid #E5E7EB; border-radius: 12px; padding: 0; margin: 0 auto; display: block;"/>
-                            <div style="margin-top: 24px; padding: 12px; background-color: #F9FAFB; border-radius: 8px; display: inline-block;">
-                                <p style="margin: 0; font-size: 12px; color: #6B7280;">TICKET ID</p>
-                                <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 16px; font-weight: bold; color: #111827;">${p.ticketId}</p>
-                            </div>
-                        </div>
-                    </div>
-                `,
-                attachments: [{
-                    filename: 'E-Ticket.png',
-                    content: finalImageBuffer,
-                    contentType: 'image/png',
-                    contentDisposition: 'inline',
-                    cid: `qr_${p.ticketId}@hadir.in`
-                }]
-            };
             try {
-                await transporter.sendMail(mailOptions);
-                console.log(`Email berhasil dikirim ke ${p.email}`);
-            } catch (err) {
-                console.error("SMTP Error untuk", p.email, err);
+                // Buat token unsubscribe
+                    const unsubToken = jwt.sign({ participantId: p.id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '30d' });
+                    const unsubscribeUrl = `${process.env.BASE_URL}/api/participants/unsubscribe?token=${unsubToken}`;
+
+                    await emailService.sendTicketEmail(p, event, finalImageBuffer, unsubscribeUrl);
+                } catch (err) {
+                    console.error("AWS SES Error untuk", p.email, err);
+                }
             }
+
+            console.log(`Proses blast tiket selesai untuk event ${event.name}`);
+
+        } catch (error) {
+            console.error("Error blastTickets:", error);
         }
+    };
 
-        console.log(`Proses blast tiket selesai untuk event ${event.name}`);
+    // ─── Unsubscribe Handler ───
+    const unsubscribe = async (req, res) => {
+        try {
+            const { token } = req.query;
+            if (!token) return res.status(400).send("Token tidak valid.");
 
-    } catch (error) {
-        console.error("Error blastTickets:", error);
-    }
-};
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+            const participant = await prisma.participant.update({
+                where: { id: decoded.participantId },
+                data: { unsubscribed: true },
+                include: { event: true }
+            });
 
-// Endpoint untuk download template CSV
+            // Tampilkan halaman sukses sederhana
+            res.send(`
+            <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+                <h2 style="color: #4B5563;">Berhasil Berhenti Berlangganan</h2>
+                <p>Kamu tidak akan lagi menerima email blast dari event <strong>${participant.event.name}</strong>.</p>
+            </div>
+        `);
+        } catch (error) {
+            res.status(400).send("Token kadaluarsa atau tidak valid.");
+        }
+    };
 
-const downloadTemplate = async (req, res) => {
-    try {
-        // BOM + sep hint agar Excel otomatis parsing kolom dengan benar
-        const BOM = '\uFEFF';
-        const sepHint = 'sep=,\r\n';
-        const csvContent = [
-            'name,email,noTelp',
-            'Budi Santoso,budi@email.com,081234567890',
-            'Siti Aminah,siti@email.com,082345678901',
-            'Andi Pratama,andi@email.com,',
-        ].join('\r\n');
+    // Endpoint untuk download template CSV
 
-        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-        res.setHeader('Content-Disposition', 'attachment; filename="template_peserta_hadir_in.csv"');
-        return res.status(200).send(BOM + sepHint + csvContent);
-    } catch (error) {
-        console.error("Error downloadTemplate:", error);
-        return res.status(500).json({ status: "error", message: "Gagal membuat template." });
-    }
-};
+    const downloadTemplate = async (req, res) => {
+        try {
+            // BOM + sep hint agar Excel otomatis parsing kolom dengan benar
+            const BOM = '\uFEFF';
+            const sepHint = 'sep=,\r\n';
+            const csvContent = [
+                'name,email,noTelp',
+                'Budi Santoso,budi@email.com,081234567890',
+                'Siti Aminah,siti@email.com,082345678901',
+                'Andi Pratama,andi@email.com,',
+            ].join('\r\n');
 
-module.exports = {
-    registerManual,
-    registerBulk,
-    getParticipants,
-    updateParticipant,
-    deleteParticipant,
-    sendTicket,
-    blastTickets,
-    downloadTemplate
-};
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', 'attachment; filename="template_peserta_hadir_in.csv"');
+            return res.status(200).send(BOM + sepHint + csvContent);
+        } catch (error) {
+            console.error("Error downloadTemplate:", error);
+            return res.status(500).json({ status: "error", message: "Gagal membuat template." });
+        }
+    };
+
+    module.exports = {
+        registerManual,
+        registerBulk,
+        getParticipants,
+        updateParticipant,
+        deleteParticipant,
+        sendTicket,
+        blastTickets,
+        downloadTemplate,
+        unsubscribe
+    };

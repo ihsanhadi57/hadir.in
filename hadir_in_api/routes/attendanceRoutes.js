@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const attendanceController = require('../controllers/attendanceController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-const multer = require('multer');
+const { attendanceStorage } = require('../config/cloudinary');
 
-// Setup multer untuk menyimpan foto self check-in
-const upload = multer({ dest: 'uploads/attendance/' });
+// Setup multer untuk menyimpan foto self check-in di Cloudinary
+const upload = multer({ storage: attendanceStorage });
 
 // Rute public: Peserta absen mandiri (tanpa login akun)
 router.post('/self-checkin/:eventId', upload.single('photo'), attendanceController.selfCheckIn);
