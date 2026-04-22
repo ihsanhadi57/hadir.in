@@ -5,6 +5,7 @@ hadir_in_api/node_modules/
 hadir_in_api/.env
 hadir_in_api/generated/
 hadir_in_api/uploads/
+!hadir_in_api/public/
 hadir_in_api/*.png
 hadir_in_api/*.log
 
@@ -31,4 +32,12 @@ hadir_in_app/android/app/release
 # OS
 .DS_Store
 Thumbs.db
+splash.mp4
+
+# notes
+prd_app.docx
+prd_app.txt
+hadir_in_tc.txt
+read_docx.py
+vide.mp4
 splash.mp4

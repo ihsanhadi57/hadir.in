@@ -26,6 +26,7 @@ import '../widgets/participant_range_picker_sheet.dart';
 import '../widgets/control_button.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/log_card.dart';
+import '../../../../core/widgets/brand_text.dart';
 
 class EventDetailPage extends StatefulWidget {
   final EventModel event;
@@ -191,14 +192,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             ),
           ),
           const SizedBox(width: 16),
-          Text(
-            'hadir.in',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.primary,
-            ),
-          ),
+          const BrandText(fontSize: 20),
           const Spacer(),
           // Share Invite Button (Only for Organizer)
           BlocBuilder<AuthBloc, AuthState>(

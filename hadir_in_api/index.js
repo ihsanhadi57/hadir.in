@@ -21,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 // Serve uploaded files (template images) publicly
 app.use('/uploads', express.static('uploads'));
+app.use('/public', express.static('public'));
 
 // Routes import
 const authRoutes = require('./routes/authRoutes');
@@ -127,7 +128,7 @@ app.get('/', (req, res) => {
         <div class="grid-bg"></div>
         <div class="container">
             <div class="badge"><span class="status-dot"></span> API Server Online</div>
-            <img src="/uploads/logo-no-bg.png" alt="Hadir.in Logo" class="logo-img">
+            <img src="/public/logo-no-bg.png" alt="Hadir.in Logo" class="logo-img">
             <h1>Hadir<span class="highlight">.in</span></h1>
             <p>Sistem Manajemen Kehadiran & Ticketing Event Pintar berbasis Cloud. Kelola ribuan peserta hanya dalam genggaman tangan.</p>
             <div class="btn-group">
