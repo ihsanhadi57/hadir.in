@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class ControlButton extends StatelessWidget {
   final IconData icon;
@@ -32,7 +33,7 @@ class ControlButton extends StatelessWidget {
               : CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: const Color(0xFF2563EB), size: 24),
+            Icon(icon, color: AppTheme.primary, size: 24),
             const SizedBox(height: 12),
             Text(
               label,

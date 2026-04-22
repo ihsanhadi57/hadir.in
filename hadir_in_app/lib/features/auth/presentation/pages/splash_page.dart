@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/brand_text.dart';
 import '../../presentation/bloc/auth_bloc.dart';
 import '../../presentation/bloc/auth_event.dart';
 import '../../presentation/bloc/auth_state.dart';
@@ -49,7 +50,7 @@ class _SplashPageState extends State<SplashPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppTheme.primary,
+        backgroundColor: AppTheme.background,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -67,15 +68,7 @@ class _SplashPageState extends State<SplashPage> {
               const SizedBox(height: 20),
 
               // Brand name
-              Text(
-                'hadir.in',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: -0.5,
-                ),
-              ),
+              const BrandText(fontSize: 28),
 
               const SizedBox(height: 48),
 
@@ -85,7 +78,7 @@ class _SplashPageState extends State<SplashPage> {
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.primary.withValues(alpha: 0.3),
                 ),
               ),
             ],

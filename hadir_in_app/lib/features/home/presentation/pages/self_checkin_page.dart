@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'; // for kIsWeb
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/api_config.dart';
+import '../../../../core/widgets/brand_text.dart';
 
 class SelfCheckInPage extends StatefulWidget {
   final String eventId;
@@ -260,13 +261,20 @@ class _SelfCheckInPageState extends State<SelfCheckInPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: Text(
-          'Hadir.in Check-in',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.primary,
-          ),
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BrandText(fontSize: 20),
+            SizedBox(width: 8),
+            Text(
+              'Check-in',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.primary,
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(

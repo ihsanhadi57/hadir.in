@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/brand_text.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -137,15 +138,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         const SizedBox(height: 16),
         // ─── Wordmark ───
-        Text(
-          'hadir.in',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.textPrimary,
-            letterSpacing: -0.5,
-          ),
-        ),
+        const BrandText(fontSize: 28),
       ],
     );
   }
@@ -413,12 +406,25 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildBottomCopyright() {
-    return Text(
-      '© 2026 hadir.in — for the culture ',
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 11,
-        color: AppTheme.textMuted.withValues(alpha: 0.8),
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '© 2026 ',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            color: AppTheme.textMuted.withValues(alpha: 0.8),
+          ),
+        ),
+        const BrandText(fontSize: 11, fontWeight: FontWeight.w700),
+        Text(
+          ' — for the culture ',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            color: AppTheme.textMuted.withValues(alpha: 0.8),
+          ),
+        ),
+      ],
     );
   }
 }

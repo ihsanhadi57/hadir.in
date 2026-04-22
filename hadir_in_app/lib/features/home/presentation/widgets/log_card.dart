@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../event/data/models/event_detail_models.dart';
 import 'log_detail_sheet.dart';
 
@@ -102,7 +103,7 @@ class LogCard extends StatelessWidget {
                         const Icon(
                           Icons.location_on_rounded,
                           size: 10,
-                          color: Color(0xFF2563EB),
+                          color: AppTheme.primary,
                         ),
                         const SizedBox(width: 2),
                         Text(
@@ -110,7 +111,7 @@ class LogCard extends StatelessWidget {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF2563EB),
+                            color: AppTheme.primary,
                           ),
                         ),
                       ],
@@ -130,7 +131,7 @@ class LogCard extends StatelessWidget {
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: isJustNow
-                        ? const Color(0xFF2563EB)
+                        ? AppTheme.primary
                         : const Color(0xFF6B7280),
                   ),
                 ),

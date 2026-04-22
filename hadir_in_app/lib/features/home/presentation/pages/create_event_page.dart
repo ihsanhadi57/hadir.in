@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hadir_in_app/core/widgets/brand_text.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -298,14 +299,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            'hadir.in',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.primary,
-            ),
-          ),
+          const BrandText(fontSize: 28),
           const Spacer(),
           Container(
             width: 36,

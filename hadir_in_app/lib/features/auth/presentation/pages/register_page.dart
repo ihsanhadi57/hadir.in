@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/brand_text.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -334,12 +335,30 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              'Saya setuju sama Syarat & Ketentuan hadir.in',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                color: AppTheme.textSecondary,
-                height: 1.5,
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                  height: 1.5,
+                ),
+                children: [
+                  const TextSpan(text: 'Saya setuju sama Syarat & Ketentuan '),
+                  TextSpan(
+                    text: 'hadir',
+                    style: TextStyle(
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '.in',
+                    style: TextStyle(
+                      color: AppTheme.primaryContainer,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

@@ -300,61 +300,93 @@ const renderSelfCheckInPage = async (req, res) => {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8F9FE; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .btn-primary { background: #002766; box-shadow: 0 4px 12px rgba(0, 39, 102, 0.2); transition: all 0.2s; }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
-        .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #F8F9FE; 
+            background-image: radial-gradient(at 0% 0%, rgba(0, 39, 102, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(255, 111, 97, 0.05) 0px, transparent 50%);
+        }
+        .glass { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 20px 50px rgba(0, 39, 102, 0.08);
+        }
+        .btn-primary { 
+            background: #002766; 
+            box-shadow: 0 8px 20px rgba(0, 39, 102, 0.2); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0, 39, 102, 0.25); }
+        .btn-primary:active { transform: scale(0.96); }
+        .btn-primary:disabled { background: #cbd5e1; box-shadow: none; transform: none; cursor: not-allowed; }
+        
+        .shimmer { 
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%); 
+            background-size: 200% 100%; 
+            animation: shimmer 2s infinite; 
+        }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-        #video-container { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 16px; overflow: hidden; }
+        
+        #video-container { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 24px; overflow: hidden; }
         #video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #canvas { display: none; }
-        .step-inactive { opacity: 0.5; pointer-events: none; }
+        
+        input:focus { outline: none; border-color: #002766; box-shadow: 0 0 0 4px rgba(0, 39, 102, 0.1); }
+        
+        .brand-hadir { color: #002766; }
+        .brand-in { color: #FF6F61; }
+        
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="min-h-screen py-8 px-4 flex flex-col items-center">
-    <div class="w-full max-w-md">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-[#002766] tracking-tight mb-2">hadir.in</h1>
-            <div class="inline-flex items-center px-3 py-1 bg-blue-50 text-[#002766] text-xs font-bold rounded-full uppercase tracking-wider">
+<body class="min-h-screen py-10 px-6 flex flex-col items-center">
+    <div class="w-full max-w-md fade-in">
+        <!-- Header with Logo -->
+        <div class="flex flex-col items-center mb-10">
+            <img src="/uploads/logo-no-bg.png" alt="Logo" class="h-16 mb-4 drop-shadow-md">
+            <h1 class="text-3xl font-extrabold tracking-tight">
+                <span class="brand-hadir">hadir</span><span class="brand-in">.in</span>
+            </h1>
+            <div class="mt-3 px-4 py-1.5 bg-white shadow-sm border border-gray-100 text-[#002766] text-[10px] font-bold rounded-full uppercase tracking-[0.2em]">
                 Self Check-in
             </div>
         </div>
 
-        <!-- Success Card (Hidden by default) -->
-        <div id="success-card" class="hidden glass rounded-3xl p-8 text-center shadow-xl animate-in fade-in zoom-in duration-500">
-            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+        <!-- Success Card -->
+        <div id="success-card" class="hidden glass rounded-[2rem] p-10 text-center animate-in fade-in zoom-in duration-500">
+            <div class="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                 </svg>
             </div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">Berhasil!</h2>
-            <p id="success-message" class="text-gray-600 mb-8"></p>
-            <button onclick="window.location.reload()" class="w-full py-4 rounded-xl border-2 border-gray-100 font-bold text-gray-500 hover:bg-gray-50">Tutup</button>
+            <h2 class="text-2xl font-extrabold text-gray-900 mb-3">Absensi Berhasil!</h2>
+            <p id="success-message" class="text-gray-500 leading-relaxed mb-10"></p>
+            <button onclick="window.location.reload()" class="w-full py-4 rounded-2xl bg-gray-50 font-bold text-gray-600 hover:bg-gray-100 transition-colors">Tutup</button>
         </div>
 
         <!-- Form Card -->
-        <div id="form-card" class="glass rounded-3xl p-6 shadow-xl space-y-6">
-            <div class="border-b border-gray-100 pb-4">
+        <div id="form-card" class="glass rounded-[2.5rem] p-8 space-y-8">
+            <div class="text-center">
+                <p class="text-[10px] font-extrabold text-blue-400 uppercase tracking-widest mb-1">Event Kamu</p>
                 <h3 class="text-xl font-bold text-gray-900">${event.name}</h3>
             </div>
 
             <!-- Step 1: Location -->
-            <div id="location-section" class="p-4 rounded-2xl bg-blue-50 border border-blue-100">
-                <div class="flex items-center gap-4">
-                    <div id="loc-icon" class="w-10 h-10 bg-blue-200 text-[#002766] rounded-xl flex items-center justify-center">
+            <div id="location-section" class="p-5 rounded-3xl bg-[#EEF2FF] border border-blue-50 relative overflow-hidden">
+                <div class="flex items-center gap-4 relative z-10">
+                    <div id="loc-icon" class="w-12 h-12 bg-white text-[#002766] rounded-2xl shadow-sm flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <p id="loc-title" class="text-sm font-bold text-gray-900">Mendeteksi Lokasi...</p>
-                        <p id="loc-status" class="text-xs text-gray-500">Mohon izinkan akses GPS</p>
+                        <p id="loc-title" class="text-xs font-extrabold text-gray-900 uppercase tracking-tight">Mendeteksi Lokasi...</p>
+                        <p id="loc-status" class="text-[11px] text-gray-500 font-medium">Mohon izinkan akses GPS</p>
                     </div>
-                    <button id="retry-loc" class="hidden p-2 text-[#002766] hover:bg-blue-100 rounded-lg">
+                    <button id="retry-loc" class="hidden w-10 h-10 flex items-center justify-center text-[#002766] bg-white rounded-xl shadow-sm hover:scale-105 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
                         </svg>
@@ -363,51 +395,54 @@ const renderSelfCheckInPage = async (req, res) => {
             </div>
 
             <!-- Step 2: Form Details -->
-            <div id="form-details" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Lengkap</label>
-                    <input type="text" id="name" placeholder="Budi" class="w-full px-4 py-3.5 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium">
+            <div id="form-details" class="space-y-5">
+                <div class="group">
+                    <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.1em] mb-2 px-1">Nama Lengkap</label>
+                    <input type="text" id="name" placeholder="Masukkan nama Anda" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-50 focus:bg-white transition-all text-gray-900 font-bold placeholder:text-gray-300 placeholder:font-normal">
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email (Opsional)</label>
-                    <input type="email" id="email" placeholder="budi@example.com" class="w-full px-4 py-3.5 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium">
+                <div class="group">
+                    <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.1em] mb-2 px-1">Email (Opsional)</label>
+                    <input type="email" id="email" placeholder="contoh@mail.com" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-50 focus:bg-white transition-all text-gray-900 font-bold placeholder:text-gray-300 placeholder:font-normal">
                 </div>
             </div>
 
-            <!-- Step 3: Photo (If Required) -->
+            <!-- Step 3: Photo -->
             ${requirePhoto === 'true' ? `
             <div id="photo-section" class="space-y-4">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Foto Kehadiran</label>
-                <div id="video-container" class="group">
+                <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.1em] px-1">Foto Kehadiran</label>
+                <div id="video-container" class="shadow-2xl ring-8 ring-white/50">
                     <video id="video" autoplay playsinline></video>
                     <div id="shutter-overlay" class="absolute inset-0 bg-white opacity-0 transition-opacity"></div>
-                    <button id="capture-btn" class="absolute bottom-4 left-1/2 -translate-x-1/2 w-14 h-14 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                        <div class="w-10 h-10 bg-red-500 rounded-full"></div>
+                    <button id="capture-btn" class="absolute bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-full p-1.5 shadow-2xl flex items-center justify-center">
+                        <div class="w-full h-full bg-red-500 rounded-full border-4 border-white"></div>
                     </button>
                     <div id="photo-preview" class="hidden absolute inset-0">
                         <img id="preview-img" class="w-full h-full object-cover">
-                        <button id="retake-btn" class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full backdrop-blur-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button id="retake-btn" class="absolute top-4 right-4 bg-black/60 text-white w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
                 </div>
-                <p class="text-[10px] text-center text-gray-400 italic">Posisikan wajah Anda di tengah kotak</p>
+                <p class="text-[10px] text-center text-gray-400 font-medium italic">Posisikan wajah Anda di tengah kotak</p>
             </div>
             ` : ''}
 
             <!-- Submit Button -->
-            <button id="submit-btn" disabled class="btn-primary w-full py-4 rounded-2xl text-white font-bold text-lg">
-                Kirim Check-in
-            </button>
-            <p id="error-msg" class="text-xs text-red-500 text-center font-medium empty:hidden"></p>
+            <div class="pt-2">
+                <button id="submit-btn" disabled class="btn-primary w-full py-5 rounded-[1.25rem] text-white font-extrabold text-lg tracking-tight">
+                    Kirim Check-in
+                </button>
+                <p id="error-msg" class="mt-4 text-xs text-red-500 text-center font-bold empty:hidden"></p>
+            </div>
         </div>
         
         <canvas id="canvas"></canvas>
 
-        <footer class="mt-12 text-center">
-            <p class="text-xs text-gray-400 font-medium">© 2026 Hadir.in • Smart Attendance</p>
+        <footer class="mt-16 text-center space-y-2">
+            <p class="text-[11px] text-gray-300 font-bold tracking-widest uppercase">Powered by Hadir.in</p>
+            <p class="text-[10px] text-gray-400 font-medium">© 2026 Smart Attendance System</p>
         </footer>
     </div>
 
@@ -429,13 +464,9 @@ const renderSelfCheckInPage = async (req, res) => {
 
         // --- Geolocation ---
         function getGeolocation() {
-            if (!window.isSecureContext && window.location.hostname !== 'localhost' && !window.location.hostname.startsWith('127.')) {
-                updateLocError("HTTPS diperlukan untuk akses GPS di jaringan ini.");
-                return;
-            }
             locTitle.innerText = "Mendeteksi Lokasi...";
             locStatus.innerText = "Mohon izinkan akses GPS";
-            locIcon.className = "w-10 h-10 bg-blue-200 text-[#002766] rounded-xl flex items-center justify-center shimmer";
+            locIcon.className = "w-12 h-12 bg-white text-[#002766] rounded-2xl shadow-sm flex items-center justify-center shimmer";
             retryLoc.classList.add('hidden');
 
             if (!navigator.geolocation) {
@@ -449,7 +480,7 @@ const renderSelfCheckInPage = async (req, res) => {
                     longitude = pos.coords.longitude;
                     locTitle.innerText = "Lokasi Berhasil Didapat";
                     locStatus.innerText = latitude.toFixed(6) + ", " + longitude.toFixed(6);
-                    locIcon.className = "w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center";
+                    locIcon.className = "w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl shadow-sm flex items-center justify-center";
                     validateForm();
                 },
                 (err) => {
@@ -457,14 +488,14 @@ const renderSelfCheckInPage = async (req, res) => {
                     if (err.code === 1) msg = "Akses lokasi ditolak.";
                     updateLocError(msg);
                 },
-                { enableHighAccuracy: true, timeout: 10000 }
+                { enableHighAccuracy: true, timeout: 15000 }
             );
         }
 
         function updateLocError(msg) {
             locTitle.innerText = "Lokasi Gagal";
             locStatus.innerText = msg;
-            locIcon.className = "w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center";
+            locIcon.className = "w-12 h-12 bg-red-50 text-red-500 rounded-2xl shadow-sm flex items-center justify-center";
             retryLoc.classList.remove('hidden');
             validateForm();
         }
@@ -483,13 +514,9 @@ const renderSelfCheckInPage = async (req, res) => {
             const shimmerOverlay = document.getElementById('shutter-overlay');
 
             async function startCamera() {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    errorMsg.innerText = "Kamera diblokir karena koneksi tidak aman (Non-HTTPS).";
-                    return;
-                }
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: "user" }, 
+                        video: { facingMode: "user", width: { ideal: 1024 }, height: { ideal: 1024 } }, 
                         audio: false 
                     });
                     video.srcObject = stream;
@@ -501,8 +528,8 @@ const renderSelfCheckInPage = async (req, res) => {
             startCamera();
 
             captureBtn.onclick = () => {
-                shimmerOverlay.classList.add('opacity-50');
-                setTimeout(() => shimmerOverlay.classList.remove('opacity-50'), 100);
+                shimmerOverlay.classList.add('opacity-80');
+                setTimeout(() => shimmerOverlay.classList.remove('opacity-80'), 100);
 
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
@@ -516,7 +543,7 @@ const renderSelfCheckInPage = async (req, res) => {
                     previewImg.src = URL.createObjectURL(blob);
                     preview.classList.remove('hidden');
                     validateForm();
-                }, 'image/jpeg', 0.8);
+                }, 'image/jpeg', 0.85);
             };
 
             retakeBtn.onclick = () => {
@@ -540,7 +567,7 @@ const renderSelfCheckInPage = async (req, res) => {
         // --- Submit Logic ---
         submitBtn.onclick = async () => {
             submitBtn.disabled = true;
-            submitBtn.innerText = "Mengirim...";
+            submitBtn.innerText = "Tunggu sebentar...";
             errorMsg.innerText = "";
 
             const formData = new FormData();
@@ -564,13 +591,14 @@ const renderSelfCheckInPage = async (req, res) => {
                     document.getElementById('form-card').classList.add('hidden');
                     document.getElementById('success-card').classList.remove('hidden');
                     document.getElementById('success-message').innerText = data.message;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     errorMsg.innerText = data.message;
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Kirim Check-in";
                 }
             } catch (err) {
-                errorMsg.innerText = "Terjadi kesalahan koneksi.";
+                errorMsg.innerText = "Gagal terhubung ke server.";
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Kirim Check-in";
             }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/brand_text.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/data/repositories/event_repository.dart';
 import '../widgets/event_card.dart';
@@ -100,14 +101,7 @@ class _EventsPageState extends State<EventsPage> {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            'hadir.in',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
-            ),
-          ),
+          const BrandText(fontSize: 18),
           const Spacer(),
         ],
       ),

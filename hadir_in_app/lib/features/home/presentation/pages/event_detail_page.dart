@@ -22,6 +22,10 @@ import 'location_picker_page.dart';
 import 'attendance_logs_page.dart';
 import '../../../../core/constants/api_config.dart';
 import '../widgets/log_detail_sheet.dart';
+import '../widgets/participant_range_picker_sheet.dart';
+import '../widgets/control_button.dart';
+import '../widgets/stat_card.dart';
+import '../widgets/log_card.dart';
 
 class EventDetailPage extends StatefulWidget {
   final EventModel event;
@@ -67,9 +71,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(
-                        color: AppTheme.primary,
-                      ),
+                      child: CircularProgressIndicator(color: AppTheme.primary),
                     ); // Blue loading
                   }
                   if (snapshot.hasError) {
@@ -136,7 +138,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                           Row(
                             children: [
                               Expanded(
-                                child: _buildStatCard(
+                                child: StatCard(
                                   title: 'Attended',
                                   value: attended.toString(),
                                   subtext: '+0 from last min',
@@ -146,7 +148,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: _buildStatCard(
+                                child: StatCard(
                                   title: 'Absent',
                                   value: absent.toString(),
                                   subtext: '$absentPct% of total',
@@ -404,9 +406,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
               hasLocation
                   ? Icons.location_on_rounded
                   : Icons.location_off_rounded,
-              color: hasLocation
-                  ? AppTheme.primary
-                  : const Color(0xFF9CA3AF),
+              color: hasLocation ? AppTheme.primary : const Color(0xFF9CA3AF),
               size: 20,
             ),
           ),
@@ -546,73 +546,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required String subtext,
-    required Color subtextColor,
-    required Color dotColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF4B5563),
-                ),
-              ),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: dotColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtext,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: subtextColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildLogsSection(List<AttendanceLogModel> logs) {
     return Column(
@@ -666,7 +600,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
           )
         else ...[
           // Ambil max 4 log teratas untuk preview
-          ...logs.take(4).map((log) => _buildLogCard(log)),
+          ...logs.take(4).map((log) => LogCard(log: log)),
           const SizedBox(height: 12),
           // View Full Logs button
           GestureDetector(
@@ -705,143 +639,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
-  Widget _buildLogCard(AttendanceLogModel log) {
-    final name = log.participantName ?? 'Gak diketahui';
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
-    // Mock category if we don't have it
-    final category = log.participantTicketId != null
-        ? 'Tiket: ${log.participantTicketId}'
-        : 'Gapake Tiket';
-
-    final isJustNow = log.relativeTime == 'Baru saja';
-
-    return GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => LogDetailSheet(log: log),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Avatar
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFF4B5563), // Dark grey placeholder
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  initial,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Name and Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          category,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            color: const Color(0xFF6B7280),
-                          ),
-                        ),
-                      ),
-                      if (log.latitude != null && log.longitude != null) ...[
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.location_on_rounded,
-                          size: 10,
-                          color: AppTheme.primary,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          'Verified',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // Time and Gateway
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  isJustNow ? 'BARUSAN' : log.relativeTime.toUpperCase(),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: isJustNow
-                        ? AppTheme.primary
-                        : const Color(0xFF6B7280),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'BERHASIL',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF9CA3AF),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildEventControlSection(List<ParticipantModel> participants) {
     return BlocBuilder<AuthBloc, AuthState>(
@@ -870,7 +668,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
               children: [
                 if (isOwner) ...[
                   Expanded(
-                    child: _buildControlButton(
+                    child: ControlButton(
                       icon: Icons.person_add_rounded,
                       label: 'Add Participant',
                       onTap: () => _showAddParticipantOptions(),
@@ -879,7 +677,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   const SizedBox(width: 16),
                 ],
                 Expanded(
-                  child: _buildControlButton(
+                  child: ControlButton(
                     icon: Icons.qr_code_scanner_rounded,
                     label: 'Scan QR',
                     onTap: () async {
@@ -905,7 +703,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildControlButton(
+                    child: ControlButton(
                       icon: Icons.design_services_rounded,
                       label: 'Design Ticket',
                       onTap: () {
@@ -921,7 +719,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildControlButton(
+                    child: ControlButton(
                       icon: Icons.mark_email_read_rounded,
                       label: 'Blast E-Tickets',
                       onTap: () => _showBlastDialog(participants),
@@ -930,7 +728,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              _buildControlButton(
+              ControlButton(
                 icon: Icons.qr_code_2_rounded,
                 label: 'Tampilkan QR Self Check-in',
                 isFullWidth: true,
@@ -1087,16 +885,20 @@ class _EventDetailPageState extends State<EventDetailPage> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () async {
-                                final res = await showModalBottomSheet<Map<String, int>>(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (_) => ParticipantRangePickerSheet(
-                                    participants: participants,
-                                    initialStart: startValue,
-                                    initialEnd: endValue,
-                                  ),
-                                );
+                                final res =
+                                    await showModalBottomSheet<
+                                      Map<String, int>
+                                    >(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) =>
+                                          ParticipantRangePickerSheet(
+                                            participants: participants,
+                                            initialStart: startValue,
+                                            initialEnd: endValue,
+                                          ),
+                                    );
                                 if (res != null) {
                                   setState(() {
                                     startValue = res['start'];
@@ -1104,16 +906,25 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                   });
                                 }
                               },
-                              icon: const Icon(Icons.touch_app_rounded, size: 18),
+                              icon: const Icon(
+                                Icons.touch_app_rounded,
+                                size: 18,
+                              ),
                               label: Text(
                                 'Buka Daftar Peserta & Pilih',
-                                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 foregroundColor: AppTheme.primary,
                                 side: const BorderSide(color: AppTheme.primary),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           ),
@@ -1129,14 +940,21 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 20),
+                            const Icon(
+                              Icons.info_outline_rounded,
+                              color: AppTheme.primary,
+                              size: 20,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                startValue != null && endValue != null 
+                                startValue != null && endValue != null
                                     ? 'Rentang terpilih: Urutan $startValue s/d $endValue. Total ${endValue! - startValue! + 1} Peserta.'
                                     : 'Silakan pilih rentang terlebih dahulu.',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.primary),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  color: AppTheme.primary,
+                                ),
                               ),
                             ),
                           ],
@@ -1231,7 +1049,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     if (result == null) return;
     if (!mounted) return;
 
-    final targetCount = result['isPartial'] == true 
+    final targetCount = result['isPartial'] == true
         ? ((result['end'] as int) - (result['start'] as int) + 1)
         : participants.length;
 
@@ -1279,43 +1097,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     }
   }
 
-  Widget _buildControlButton({
-    required IconData icon,
-    required String label,
-    bool isFullWidth = false,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: isFullWidth ? double.infinity : null,
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFEEF2FF), // soft blue bg
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: isFullWidth
-              ? CrossAxisAlignment.center
-              : CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: AppTheme.primary, size: 24),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              textAlign: isFullWidth ? TextAlign.center : TextAlign.start,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   void _showSelfCheckinQR(BuildContext context) {
     bool requirePhoto = false;
@@ -2068,18 +1850,29 @@ class _EventDetailPageState extends State<EventDetailPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.campaign_rounded, size: 48, color: AppTheme.primary),
+            const Icon(
+              Icons.campaign_rounded,
+              size: 48,
+              color: AppTheme.primary,
+            ),
             const SizedBox(height: 16),
             Text(
               'Kirim $targetCount Tiket?',
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               'Pastikan data peserta sudah benar. Email tidak valid akan menghanguskan kredit tanpa refund.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppTheme.textMuted,
+              ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -2087,9 +1880,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    style: OutlinedButton.styleFrom(
-                      shape: StadiumBorder(),
-                    ),
+                    style: OutlinedButton.styleFrom(shape: StadiumBorder()),
                     child: const Text('Batal'),
                   ),
                 ),
@@ -2098,7 +1889,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary, 
+                      backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
                       shape: StadiumBorder(),
                     ),
@@ -2106,224 +1897,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildCheckmarkRule(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.check_circle_rounded, size: 16, color: Colors.green),
-          const SizedBox(width: 8),
-          Expanded(child: Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted))),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Range Picker Bottom Sheet ───
-class ParticipantRangePickerSheet extends StatefulWidget {
-  final List<ParticipantModel> participants;
-  final int? initialStart;
-  final int? initialEnd;
-
-  const ParticipantRangePickerSheet({
-    super.key,
-    required this.participants,
-    this.initialStart,
-    this.initialEnd,
-  });
-
-  @override
-  State<ParticipantRangePickerSheet> createState() => _ParticipantRangePickerSheetState();
-}
-
-class _ParticipantRangePickerSheetState extends State<ParticipantRangePickerSheet> {
-  int? startIndex;
-  int? endIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    startIndex = widget.initialStart != null ? widget.initialStart! - 1 : null;
-    endIndex = widget.initialEnd != null ? widget.initialEnd! - 1 : null;
-  }
-
-  void _handleTap(int index) {
-    setState(() {
-      if (startIndex == null) {
-        startIndex = index;
-        endIndex = index;
-      } else if (startIndex != null && endIndex == startIndex) {
-        if (index < startIndex!) {
-          endIndex = startIndex;
-          startIndex = index;
-        } else {
-          endIndex = index;
-        }
-      } else {
-        // Reset to new tap
-        startIndex = index;
-        endIndex = index;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16),
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppTheme.textMuted.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Pilih Rentang',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (startIndex != null && endIndex != null) {
-                      Navigator.pop(context, {'start': startIndex! + 1, 'end': endIndex! + 1});
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Text(
-                    'Selesai',
-                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: AppTheme.primary),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-            child: Text(
-              'Tekan orang pertama, lalu tekan orang terakhir untuk membuat rentang biru selagi berurutan.',
-              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted),
-            ),
-          ),
-          const Divider(height: 24),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(bottom: 24),
-              itemCount: widget.participants.length,
-              itemBuilder: (context, index) {
-                final p = widget.participants[index];
-                bool isSelected = false;
-                bool isStart = false;
-                bool isEnd = false;
-
-                if (startIndex != null && endIndex != null) {
-                  isSelected = index >= startIndex! && index <= endIndex!;
-                  isStart = index == startIndex;
-                  isEnd = index == endIndex;
-                }
-
-                return GestureDetector(
-                  onTap: () => _handleTap(index),
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.primary.withValues(alpha: 0.1) : Colors.transparent,
-                      borderRadius: BorderRadius.vertical(
-                        top: isStart ? const Radius.circular(16) : Radius.zero,
-                        bottom: isEnd ? const Radius.circular(16) : Radius.zero,
-                      ),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: (isEnd || (!isSelected && index != widget.participants.length - 1))
-                                ? AppTheme.surfaceContainerLow
-                                : Colors.transparent,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 32,
-                            child: Text(
-                              '${index + 1}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? AppTheme.primary : AppTheme.textMuted,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p.name,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                    color: isSelected ? AppTheme.primary : AppTheme.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  p.email,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    color: isSelected ? AppTheme.primary.withValues(alpha: 0.7) : AppTheme.textMuted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isStart || isEnd) ...[
-                            const SizedBox(width: 8),
-                            Icon(Icons.check_circle_rounded, color: AppTheme.primary, size: 20),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
