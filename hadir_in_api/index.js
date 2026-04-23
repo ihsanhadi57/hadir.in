@@ -9,11 +9,39 @@ process.on('unhandledRejection', (reason) => {
 })
 
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 require('dotenv').config();
 const prisma = require('./config/prisma');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+// Share io instance to all routes
+app.set('io', io);
+global.io = io;
+
+// Socket.io connection logic
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    // Join room for specific event to avoid broadcasting to everyone
+    socket.on('joinEvent', (eventId) => {
+        socket.join(eventId);
+        console.log(`Socket ${socket.id} joined event room: ${eventId}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
 
 // Middleware
 // cors() mengizinkan aplikasi Flutter kita nanti untuk mengakses API ini
@@ -205,6 +233,6 @@ app.use('/api/system', systemRoutes);
 
 // Menjalankan Server
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server sudah berjalan di http://localhost:${PORT}`);
 });
