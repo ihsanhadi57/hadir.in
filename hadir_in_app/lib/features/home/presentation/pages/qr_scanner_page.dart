@@ -17,7 +17,7 @@ class QRScannerPage extends StatefulWidget {
 class _QRScannerPageState extends State<QRScannerPage> {
   final _repo = GetIt.instance<EventRepository>();
   final MobileScannerController _scannerController = MobileScannerController();
-  
+
   bool _isProcessing = false;
 
   void _onDetect(BarcodeCapture capture) async {
@@ -148,7 +148,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 48.0),
                 child: Text(
-                  'Position the QR code within the frame',
+                  'Posisikan QR Code di dalam frame',
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.white,
                     fontSize: 14,
@@ -202,18 +202,9 @@ class QrScannerOverlayShape extends ShapeBorder {
     }
 
     return getLeftTopPath(rect)
-      ..lineTo(
-        rect.right,
-        rect.bottom,
-      )
-      ..lineTo(
-        rect.left,
-        rect.bottom,
-      )
-      ..lineTo(
-        rect.left,
-        rect.top,
-      );
+      ..lineTo(rect.right, rect.bottom)
+      ..lineTo(rect.left, rect.bottom)
+      ..lineTo(rect.left, rect.top);
   }
 
   @override
@@ -229,8 +220,9 @@ class QrScannerOverlayShape extends ShapeBorder {
       ..style = PaintingStyle.fill;
 
     final cutOutPath = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-          cutoutRect, Radius.circular(borderRadius)));
+      ..addRRect(
+        RRect.fromRectAndRadius(cutoutRect, Radius.circular(borderRadius)),
+      );
 
     final backgroundPath = Path()
       ..addRect(rect)
@@ -245,7 +237,7 @@ class QrScannerOverlayShape extends ShapeBorder {
       ..strokeWidth = borderWidth;
 
     final path = Path();
-    
+
     // Top left corner
     path.moveTo(cutoutRect.left, cutoutRect.top + borderLength);
     path.lineTo(cutoutRect.left, cutoutRect.top + borderRadius);

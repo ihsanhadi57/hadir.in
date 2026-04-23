@@ -1,7 +1,9 @@
 import 'package:get_it/get_it.dart';
 import 'core/network/dio_client.dart';
 import 'core/network/secure_storage_service.dart';
+import 'core/services/socket_service.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
+
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/event/data/repositories/event_repository.dart';
 import 'features/event/data/repositories/payment_repository.dart';
@@ -22,4 +24,6 @@ Future<void> init() async {
   // ─── Core ───
   sl.registerLazySingleton(() => DioClient());
   sl.registerLazySingleton(() => SecureStorageService());
+  sl.registerLazySingleton(() => SocketService());
+
 }

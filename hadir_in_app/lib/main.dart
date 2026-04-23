@@ -1,16 +1,21 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 import 'core/network/dio_client.dart';
+import 'core/constants/api_config.dart';
+import 'core/services/socket_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/home/presentation/pages/join_event_page.dart';
 import 'features/home/presentation/pages/self_checkin_page.dart';
+
 import 'injection_container.dart' as di;
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -25,6 +30,13 @@ void main() async {
   // Inisialisasi format tanggal (inti)
   await initializeDateFormatting('id', null);
 
+  // ─── Debug: Test HTTP connectivity ke socket server ───
+  _testSocketServerReachability();
+
+  // ─── Inisialisasi Socket.IO ───
+  final socketService = GetIt.instance<SocketService>();
+  socketService.connect();
+
   // Status bar icons gelap untuk background terang
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -34,6 +46,20 @@ void main() async {
   );
 
   runApp(const HadirInApp());
+}
+
+/// Test HTTP connectivity ke server Socket.IO untuk debugging.
+/// Ini cuma test apakah server bisa dijangkau, bukan test socket.
+void _testSocketServerReachability() async {
+  try {
+    final response = await http
+        .get(Uri.parse('${ApiConfig.socketUrl}/socket.io/?EIO=4&transport=polling'))
+        .timeout(const Duration(seconds: 10));
+    debugPrint('🌐 [HTTP Test] Socket server status: ${response.statusCode}');
+    debugPrint('🌐 [HTTP Test] Response body preview: ${response.body.substring(0, response.body.length.clamp(0, 100))}');
+  } catch (e) {
+    debugPrint('🌐 [HTTP Test] Socket server unreachable: $e');
+  }
 }
 
 class HadirInApp extends StatelessWidget {

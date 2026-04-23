@@ -11,13 +11,17 @@ class LogDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Memastikan path foto tidak double slash
+    // Memastikan path foto tidak double slash dan mendukung URL eksternal (Cloudinary)
     String? cleanPhotoUrl;
     if (log.photoUrl != null && log.photoUrl!.isNotEmpty) {
-      String cleanPath = log.photoUrl!.startsWith('/')
-          ? log.photoUrl!.substring(1)
-          : log.photoUrl!;
-      cleanPhotoUrl = '${ApiConfig.baseUrl}/$cleanPath';
+      if (log.photoUrl!.startsWith('http')) {
+        cleanPhotoUrl = log.photoUrl;
+      } else {
+        String cleanPath = log.photoUrl!.startsWith('/')
+            ? log.photoUrl!.substring(1)
+            : log.photoUrl!;
+        cleanPhotoUrl = '${ApiConfig.baseUrl}/$cleanPath';
+      }
     }
 
     return Container(

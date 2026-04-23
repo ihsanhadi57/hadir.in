@@ -76,6 +76,13 @@ const scanTicket = async (req, res) => {
             })
         ]);
 
+        // ─── Emit Socket.IO event ke semua client di room event ini ───
+        if (global.io) {
+            global.io.to(`event:${eventId}`).emit('attendanceUpdated', { eventId });
+            console.log(`📡 Socket: attendanceUpdated emitted for event:${eventId}`);
+        }
+
+
         return res.status(200).json({
             status: "success",
             message: "Check-in berhasil! Selamat datang.",
@@ -252,11 +259,12 @@ const selfCheckIn = async (req, res) => {
             }
         });
 
-        // Emit socket jika instance io ada di req (atau global global.io)
-        const io = req.app.get('io') || global.io;
-        if (io) {
-            io.to(eventId).emit('attendanceUpdated', { eventId });
+        // ─── Emit Socket.IO event ke semua client di room event ini ───
+        if (global.io) {
+            global.io.to(`event:${eventId}`).emit('attendanceUpdated', { eventId });
+            console.log(`📡 Socket: attendanceUpdated emitted for event:${eventId} (self-checkin)`);
         }
+
 
         return res.status(200).json({
             status: "success",

@@ -12,6 +12,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import 'package:hadir_in_app/features/home/presentation/pages/design_ticket_page.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/socket_service.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/data/models/event_detail_models.dart';
 import '../../../event/data/repositories/event_repository.dart';
@@ -21,6 +22,7 @@ import 'qr_scanner_page.dart';
 import 'location_picker_page.dart';
 import 'attendance_logs_page.dart';
 import '../../../../core/constants/api_config.dart';
+
 import '../widgets/log_detail_sheet.dart';
 import '../widgets/participant_range_picker_sheet.dart';
 import '../widgets/control_button.dart';
@@ -38,6 +40,7 @@ class EventDetailPage extends StatefulWidget {
 
 class _EventDetailPageState extends State<EventDetailPage> {
   final _repo = GetIt.instance<EventRepository>();
+  final _socketService = GetIt.instance<SocketService>();
 
   late Future<List<ParticipantModel>> _participantsFuture;
   late Future<List<AttendanceLogModel>> _logsFuture;
@@ -49,6 +52,23 @@ class _EventDetailPageState extends State<EventDetailPage> {
     super.initState();
     _isLive = widget.event.status == EventStatus.active;
     _refresh();
+
+    // ─── Socket.IO: Join event room & listen for updates ───
+    _socketService.joinEvent(widget.event.id);
+    _socketService.onAttendanceUpdated((eventId) {
+      if (eventId == widget.event.id && mounted) {
+        debugPrint('🔄 [EventDetail] Real-time update received, refreshing...');
+        _refresh();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // ─── Socket.IO: Leave event room & cleanup listener ───
+    _socketService.leaveEvent(widget.event.id);
+    _socketService.offAttendanceUpdated();
+    super.dispose();
   }
 
   void _refresh() {
@@ -140,7 +160,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                             children: [
                               Expanded(
                                 child: StatCard(
-                                  title: 'Attended',
+                                  title: 'Hadir',
                                   value: attended.toString(),
                                   subtext: '+0 from last min',
                                   subtextColor: const Color(0xFF10B981),
@@ -150,7 +170,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: StatCard(
-                                  title: 'Absent',
+                                  title: 'Belum Datang',
                                   value: absent.toString(),
                                   subtext: '$absentPct% of total',
                                   subtextColor: const Color(0xFF6B7280),
@@ -505,7 +525,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Total Participants',
+                'Total Peserta',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -539,8 +559,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
       ),
     );
   }
-
-
 
   Widget _buildLogsSection(List<AttendanceLogModel> logs) {
     return Column(
@@ -633,8 +651,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
-
-
   Widget _buildEventControlSection(List<ParticipantModel> participants) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
@@ -664,7 +680,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   Expanded(
                     child: ControlButton(
                       icon: Icons.person_add_rounded,
-                      label: 'Add Participant',
+                      label: 'Tambah Peserta',
                       onTap: () => _showAddParticipantOptions(),
                     ),
                   ),
@@ -699,7 +715,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   Expanded(
                     child: ControlButton(
                       icon: Icons.design_services_rounded,
-                      label: 'Design Ticket',
+                      label: 'Desain E-Ticket',
                       onTap: () {
                         Navigator.push(
                           context,
@@ -715,7 +731,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   Expanded(
                     child: ControlButton(
                       icon: Icons.mark_email_read_rounded,
-                      label: 'Blast E-Tickets',
+                      label: 'Kirim E-Tickets',
                       onTap: () => _showBlastDialog(participants),
                     ),
                   ),
@@ -789,7 +805,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Blast E-Tickets',
+                      'Kirim E-Tickets',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -1021,7 +1037,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               }
                             },
                             child: Text(
-                              'Mulai Blast Tiket',
+                              'Mulai Kirim E-Ticket',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -1090,8 +1106,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
       );
     }
   }
-
-
 
   void _showSelfCheckinQR(BuildContext context) {
     bool requirePhoto = false;
@@ -1252,7 +1266,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Add Participant',
+                'Tambah Peserta',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -1261,7 +1275,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Choose how you want to add participants to this event.',
+                'Pilih cara menambahkan peserta untuk event ini.',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   color: const Color(0xFF6B7280),
@@ -1270,8 +1284,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
               const SizedBox(height: 24),
               _buildAddOption(
                 icon: Icons.person_add_alt_1_rounded,
-                title: 'Add Manually',
-                subtitle: 'Enter participant details one by one',
+                title: 'Tambah Manual',
+                subtitle: 'Masukkan data peserta satu per satu',
                 onTap: () async {
                   Navigator.pop(ctx);
                   final result = await Navigator.push(

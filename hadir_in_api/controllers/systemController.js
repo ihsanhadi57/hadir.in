@@ -64,6 +64,37 @@ const runCleanup = async (req, res) => {
     }
 };
 
+const testSES = async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) {
+            return res.status(400).json({ status: "error", message: "Parameter email wajib diisi (contoh: ?email=kamu@gmail.com)." });
+        }
+
+        const emailService = require('../services/emailService');
+        
+        // Buat dummy data
+        const participant = { name: "Tester Hadir.in", email: email, ticketId: "TEST-12345" };
+        const event = { name: "System Diagnostic Test", contactEmail: "admin@hadirin.space" };
+        const dummyBuffer = Buffer.from('Test Ticket Image Content');
+
+        await emailService.sendTicketEmail(participant, event, dummyBuffer);
+
+        return res.status(200).json({
+            status: "success",
+            message: `Email tes berhasil dikirim ke ${email}. Silakan cek inbox/spam.`
+        });
+    } catch (error) {
+        console.error("SES Diagnostic Error:", error);
+        return res.status(500).json({
+            status: "error",
+            message: "Gagal mengirim email tes.",
+            details: error.message
+        });
+    }
+};
+
 module.exports = {
-    runCleanup
+    runCleanup,
+    testSES
 };

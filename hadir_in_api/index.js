@@ -1,45 +1,57 @@
 process.on('uncaughtException', (err) => {
     console.error('UNCAUGHT EXCEPTION:', err)
-    process.exit(1)
+    // JANGAN process.exit(1) — menyebabkan server restart dan disconnect socket
 })
 
 process.on('unhandledRejection', (reason) => {
     console.error('UNHANDLED REJECTION:', reason)
-    process.exit(1)
+    // JANGAN process.exit(1) — menyebabkan server restart dan disconnect socket
 })
 
 const express = require('express');
+const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors');
 require('dotenv').config();
 const prisma = require('./config/prisma');
 
 const app = express();
+
+// ─── Buat HTTP server untuk Express + Socket.IO ───
 const server = http.createServer(app);
+
+// ─── Setup Socket.IO ───
 const io = new Server(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+        origin: '*', // Allow semua origin (Flutter, web, dll)
+        methods: ['GET', 'POST'],
+    },
+    // Render.com handle SSL, jadi tidak perlu konfigurasi TLS di sini
+    pingTimeout: 60000,
+    pingInterval: 25000,
 });
 
-// Share io instance to all routes
-app.set('io', io);
+// Simpan io instance secara global agar bisa dipakai di controller
 global.io = io;
 
-// Socket.io connection logic
+// ─── Socket.IO Event Handlers ───
 io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+    console.log(`🔌 Socket connected: ${socket.id}`);
 
-    // Join room for specific event to avoid broadcasting to everyone
+    // Client join ke room event tertentu
     socket.on('joinEvent', (eventId) => {
-        socket.join(eventId);
-        console.log(`Socket ${socket.id} joined event room: ${eventId}`);
+        socket.join(`event:${eventId}`);
+        console.log(`📡 Socket ${socket.id} joined room event:${eventId}`);
     });
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+    // Client leave dari room event
+    socket.on('leaveEvent', (eventId) => {
+        socket.leave(`event:${eventId}`);
+        console.log(`📡 Socket ${socket.id} left room event:${eventId}`);
+    });
+
+    socket.on('disconnect', (reason) => {
+        console.log(`⚠️ Socket disconnected: ${socket.id} — ${reason}`);
     });
 });
 
@@ -231,8 +243,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/system', systemRoutes);
 
-// Menjalankan Server
+// ─── Menjalankan Server (HTTP + Socket.IO) ───
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server sudah berjalan di http://localhost:${PORT}`);
+    console.log(`🚀 Server + Socket.IO berjalan di http://localhost:${PORT}`);
 });

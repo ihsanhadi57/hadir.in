@@ -5,5 +5,6 @@ const systemController = require('../controllers/systemController');
 // Endpoint pembersihan otomatis (H+3)
 // Trigger: External Cron (e.g. cron-job.org) ping ke /api/system/cleanup?secret=...
 router.get('/cleanup', systemController.runCleanup);
+router.get('/test-ses', systemController.testSES);
 
 module.exports = router;
