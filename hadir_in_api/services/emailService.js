@@ -1,5 +1,6 @@
 const axios = require("axios");
 const qs = require("qs");
+const { cloudinary } = require("../config/cloudinary");
 
 // ─── Mailketing Config ───
 const MAILKETING_API_URL = "https://api.mailketing.co.id/api/v1/send";
@@ -49,8 +50,25 @@ const _send = async ({ fromName, to, subject, html, attachmentUrl = null }) => {
  * @param {String} unsubscribeUrl - (opsional) URL berhenti berlangganan
  * @param {String} ticketUrl      - URL publik file tiket (dari Cloudinary) untuk attachment
  */
-const sendTicketEmail = async (participant, event, ticketBuffer, unsubscribeUrl = null, ticketUrl = null) => {
+const sendTicketEmail = async (participant, event, ticketBuffer, unsubscribeUrl = null) => {
     const fromName = `${event.name} via Hadir.in`;
+
+    // Karena Anda tidak ingin menggunakan Cloudinary dan Mailketing tidak mendukung raw Buffer attachment,
+    // kita ubah Buffer tiket menjadi string Base64 agar bisa langsung tertanam di dalam HTML email.
+    let base64ImageHtml = "";
+    if (ticketBuffer) {
+        const base64Str = ticketBuffer.toString("base64");
+        const dataUri = `data:image/png;base64,${base64Str}`;
+        base64ImageHtml = `
+            <div style="margin:20px auto; text-align:center;">
+                <img src="${dataUri}" alt="E-Ticket ${event.name}" style="max-width:100%; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+            </div>
+            <div style="margin:0 auto;padding:16px;background-color:#EEF2FF;border-radius:12px;max-width:400px;">
+                <p style="margin:0 0 4px 0;font-size:14px;font-weight:bold;color:#2563EB;">📎 Simpan Tiket Anda</p>
+                <p style="margin:0;font-size:12px;color:#4B5563;">Tekan dan tahan (atau klik kanan) gambar tiket di atas lalu pilih <strong>"Simpan Gambar"</strong>, dan tunjukkan kepada panitia saat kedatangan.</p>
+            </div>
+        `;
+    }
 
     const unsubscribeHtml = unsubscribeUrl
         ? `<div style="margin-top:24px;padding-top:20px;border-top:1px solid #E5E7EB;font-size:11px;color:#9CA3AF;text-align:center;">
@@ -72,10 +90,7 @@ const sendTicketEmail = async (participant, event, ticketBuffer, unsubscribeUrl 
                 <p style="color:#4B5563;line-height:1.5;margin-bottom:24px;">
                     Berikut adalah E-Ticket Anda untuk acara <strong>${event.name}</strong>.
                 </p>
-                <div style="margin:0 auto;padding:16px;background-color:#EEF2FF;border-radius:12px;max-width:400px;">
-                    <p style="margin:0 0 4px 0;font-size:14px;font-weight:bold;color:#2563EB;">📎 Tiket Anda ada di Lampiran</p>
-                    <p style="margin:0;font-size:12px;color:#4B5563;">Unduh file <strong>E-Ticket.png</strong> yang terlampir, simpan, dan tunjukkan kepada panitia saat kedatangan.</p>
-                </div>
+                ${base64ImageHtml}
                 <div style="margin-top:24px;padding:12px;background-color:#F9FAFB;border-radius:8px;display:inline-block;">
                     <p style="margin:0;font-size:12px;color:#6B7280;">TICKET ID</p>
                     <p style="margin:4px 0 0 0;font-family:monospace;font-size:16px;font-weight:bold;color:#111827;">${participant.ticketId}</p>
@@ -90,8 +105,7 @@ const sendTicketEmail = async (participant, event, ticketBuffer, unsubscribeUrl 
             fromName,
             to: participant.email,
             subject: `E-Ticket Resmi: ${event.name}`,
-            html,
-            attachmentUrl: ticketUrl,
+            html
         });
 
         console.log(`[Mailketing] Ticket sent → ${participant.email}`);
