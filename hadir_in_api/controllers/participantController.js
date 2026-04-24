@@ -337,6 +337,11 @@ const sendTicket = async (req, res) => {
 
         res.status(200).json({ status: "success", message: `Tiket sedang dikirim ke ${p.email}` });
 
+        // ─── Debug: Log template info ───
+        console.log(`[sendTicket] Event: ${event.name}`);
+        console.log(`[sendTicket] ticketTemplateUrl: ${event.ticketTemplateUrl || '(kosong)'}`);
+        console.log(`[sendTicket] ticketConfig: ${event.ticketConfig ? JSON.stringify(event.ticketConfig) : '(kosong)'}`);
+
         const qrBuffer = await QRCode.toBuffer(p.ticketId, {
             errorCorrectionLevel: 'H', margin: 2,
             width: event.ticketConfig?.qrSize || 300,
@@ -346,8 +351,16 @@ const sendTicket = async (req, res) => {
 
         if (event.ticketTemplateUrl && event.ticketConfig) {
             try {
+                console.log(`[sendTicket] ✅ Template ditemukan, memulai composite...`);
                 const cfg = event.ticketConfig;
                 const qrSize = cfg.qrSize || 300;
+
+                // Fetch template dari URL Cloudinary sebagai Buffer
+                const templateBuffer = event.ticketTemplateUrl.startsWith('http')
+                    ? await fetchImageAsBuffer(event.ticketTemplateUrl)
+                    : event.ticketTemplateUrl;
+                console.log(`[sendTicket] Template fetched: ${Buffer.isBuffer(templateBuffer) ? (templateBuffer.length / 1024).toFixed(1) + 'KB' : 'path lokal'}`);
+
                 const qrResized = await sharp(qrBuffer).resize(qrSize, qrSize).png().toBuffer();
                 const composites = [{ input: qrResized, left: Math.round(cfg.qrX || 0), top: Math.round(cfg.qrY || 0) }];
 
@@ -363,22 +376,20 @@ const sendTicket = async (req, res) => {
                     composites.push({ input: svgText, left: Math.round(cfg.nameX), top: Math.round(cfg.nameY) });
                 }
 
-                // Fetch template dari URL Cloudinary sebagai Buffer (Sharp tidak bisa baca URL remote)
-                const templateBuffer = event.ticketTemplateUrl.startsWith('http')
-                    ? await fetchImageAsBuffer(event.ticketTemplateUrl)
-                    : event.ticketTemplateUrl; // fallback jika masih path lokal
-
                 finalImageBuffer = await sharp(templateBuffer).composite(composites).png().toBuffer();
+                console.log(`[sendTicket] ✅ Composite berhasil: ${(finalImageBuffer.length / 1024).toFixed(1)}KB`);
             } catch (err) {
-                console.error('Gagal composite untuk', p.email, err);
+                console.error('[sendTicket] ❌ Gagal composite untuk', p.email, err.message);
             }
+        } else {
+            console.log(`[sendTicket] ⚠️ Template TIDAK ditemukan, mengirim QR saja`);
         }
 
         // Buat token unsubscribe
         const unsubToken = jwt.sign({ participantId: p.id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '30d' });
         const unsubscribeUrl = `${process.env.BASE_URL}/api/participants/unsubscribe?token=${unsubToken}`;
 
-        // Using AWS SES Service
+        // Kirim via email service
         await emailService.sendTicketEmail(p, event, finalImageBuffer, unsubscribeUrl);
     } catch (error) {
         console.error("Error sendTicket:", error);
@@ -448,7 +459,27 @@ const blastTickets = async (req, res) => {
             }
         });
 
-        // Loop over target participants and send asynchronously via AWS SES
+        // ─── Debug: Log template info ───
+        console.log(`[blastTickets] Event: ${event.name}`);
+        console.log(`[blastTickets] ticketTemplateUrl: ${event.ticketTemplateUrl || '(kosong)'}`);
+        console.log(`[blastTickets] ticketConfig: ${event.ticketConfig ? JSON.stringify(event.ticketConfig) : '(kosong)'}`);
+
+        // ─── Fetch template sekali saja di luar loop (optimasi) ───
+        let templateBuffer = null;
+        if (event.ticketTemplateUrl && event.ticketConfig) {
+            try {
+                templateBuffer = event.ticketTemplateUrl.startsWith('http')
+                    ? await fetchImageAsBuffer(event.ticketTemplateUrl)
+                    : event.ticketTemplateUrl;
+                console.log(`[blastTickets] ✅ Template fetched: ${Buffer.isBuffer(templateBuffer) ? (templateBuffer.length / 1024).toFixed(1) + 'KB' : 'path lokal'}`);
+            } catch (err) {
+                console.error('[blastTickets] ❌ Gagal fetch template:', err.message);
+            }
+        } else {
+            console.log(`[blastTickets] ⚠️ Template TIDAK ditemukan, mengirim QR saja`);
+        }
+
+        // Loop over target participants
         for (const p of targetParticipants) {
             const qrBuffer = await QRCode.toBuffer(p.ticketId, {
                 errorCorrectionLevel: 'H',
@@ -458,7 +489,7 @@ const blastTickets = async (req, res) => {
 
             let finalImageBuffer = qrBuffer;
 
-            if (event.ticketTemplateUrl && event.ticketConfig) {
+            if (templateBuffer && event.ticketConfig) {
                 try {
                     const cfg = event.ticketConfig;
                     const qrSize = cfg.qrSize || 300;
@@ -478,29 +509,24 @@ const blastTickets = async (req, res) => {
                         composites.push({ input: svgText, left: Math.round(cfg.nameX), top: Math.round(cfg.nameY) });
                     }
 
-                    // Fetch template dari URL Cloudinary sebagai Buffer (Sharp tidak bisa baca URL remote)
-                    const templateBuffer = event.ticketTemplateUrl.startsWith('http')
-                        ? await fetchImageAsBuffer(event.ticketTemplateUrl)
-                        : event.ticketTemplateUrl; // fallback jika masih path lokal
-
                     finalImageBuffer = await sharp(templateBuffer).composite(composites).png().toBuffer();
+                    console.log(`[blastTickets] ✅ Composite ${p.email}: ${(finalImageBuffer.length / 1024).toFixed(1)}KB`);
                 } catch (err) {
-                    console.error('Gagal composite sharp untuk', p.email, err);
+                    console.error(`[blastTickets] ❌ Gagal composite untuk ${p.email}:`, err.message);
                 }
             }
 
             try {
-                // Buat token unsubscribe
-                    const unsubToken = jwt.sign({ participantId: p.id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '30d' });
-                    const unsubscribeUrl = `${process.env.BASE_URL}/api/participants/unsubscribe?token=${unsubToken}`;
+                const unsubToken = jwt.sign({ participantId: p.id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '30d' });
+                const unsubscribeUrl = `${process.env.BASE_URL}/api/participants/unsubscribe?token=${unsubToken}`;
 
-                    await emailService.sendTicketEmail(p, event, finalImageBuffer, unsubscribeUrl);
-                } catch (err) {
-                    console.error("AWS SES Error untuk", p.email, err);
-                }
+                await emailService.sendTicketEmail(p, event, finalImageBuffer, unsubscribeUrl);
+            } catch (err) {
+                console.error(`[blastTickets] Email error untuk ${p.email}:`, err.message);
             }
+        }
 
-            console.log(`Proses blast tiket selesai untuk event ${event.name}`);
+        console.log(`Proses blast tiket selesai untuk event ${event.name}`);
 
         } catch (error) {
             console.error("Error blastTickets:", error);
