@@ -43,31 +43,56 @@ const _send = async ({ fromName, to, subject, html, attachmentUrl = null }) => {
 };
 
 /**
+ * Helper internal untuk upload buffer ke Cloudinary
+ */
+const uploadBufferToCloudinary = (buffer, folderName) => {
+    return new Promise((resolve, reject) => {
+        console.log(`[Cloudinary] Uploading ${(buffer.length / 1024).toFixed(1)}KB image to ${folderName}...`);
+        const stream = cloudinary.uploader.upload_stream(
+            { folder: folderName, resource_type: "image", format: "png", quality: 100 },
+            (error, result) => {
+                if (error) {
+                    console.error(`[Cloudinary] Upload failed:`, error.message);
+                    return reject(error);
+                }
+                console.log(`[Cloudinary] Upload OK → ${result.secure_url} (${result.width}x${result.height})`);
+                resolve(result.secure_url);
+            }
+        );
+        stream.end(buffer);
+    });
+};
+
+/**
  * sendTicketEmail
  * @param {Object} participant    - Data peserta (name, email, ticketId)
  * @param {Object} event          - Data event (name, contactEmail, dll)
- * @param {Buffer} ticketBuffer   - Tidak dipakai langsung, perlu upload ke Cloudinary dulu
+ * @param {Buffer} ticketBuffer   - Buffer gambar tiket
  * @param {String} unsubscribeUrl - (opsional) URL berhenti berlangganan
- * @param {String} ticketUrl      - URL publik file tiket (dari Cloudinary) untuk attachment
  */
 const sendTicketEmail = async (participant, event, ticketBuffer, unsubscribeUrl = null) => {
     const fromName = `${event.name} via Hadir.in`;
 
-    // Karena Anda tidak ingin menggunakan Cloudinary dan Mailketing tidak mendukung raw Buffer attachment,
-    // kita ubah Buffer tiket menjadi string Base64 agar bisa langsung tertanam di dalam HTML email.
+    // Upload tiket ke Cloudinary agar mendapatkan URL publik yang tidak diblokir email client
+    let ticketUrl = null;
     let base64ImageHtml = "";
+    
     if (ticketBuffer) {
-        const base64Str = ticketBuffer.toString("base64");
-        const dataUri = `data:image/png;base64,${base64Str}`;
-        base64ImageHtml = `
-            <div style="margin:20px auto; text-align:center;">
-                <img src="${dataUri}" alt="E-Ticket ${event.name}" style="max-width:100%; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
-            </div>
-            <div style="margin:0 auto;padding:16px;background-color:#EEF2FF;border-radius:12px;max-width:400px;">
-                <p style="margin:0 0 4px 0;font-size:14px;font-weight:bold;color:#2563EB;">📎 Simpan Tiket Anda</p>
-                <p style="margin:0;font-size:12px;color:#4B5563;">Tekan dan tahan (atau klik kanan) gambar tiket di atas lalu pilih <strong>"Simpan Gambar"</strong>, dan tunjukkan kepada panitia saat kedatangan.</p>
-            </div>
-        `;
+        try {
+            ticketUrl = await uploadBufferToCloudinary(ticketBuffer, "hadirin_tickets");
+            base64ImageHtml = `
+                <div style="margin:20px auto; text-align:center;">
+                    <img src="${ticketUrl}" alt="E-Ticket ${event.name}" style="max-width:100%; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+                </div>
+                <div style="margin:0 auto;padding:16px;background-color:#EEF2FF;border-radius:12px;max-width:400px;">
+                    <p style="margin:0 0 4px 0;font-size:14px;font-weight:bold;color:#2563EB;">📎 Simpan Tiket Anda</p>
+                    <p style="margin:0;font-size:12px;color:#4B5563;">Tekan dan tahan (atau klik kanan) gambar tiket di atas lalu pilih <strong>"Simpan Gambar"</strong>, atau download dari lampiran email ini.</p>
+                </div>
+            `;
+        } catch (error) {
+            console.error("[Cloudinary] Gagal mengupload tiket untuk:", participant.email, error);
+            // Fallback kosong jika gagal upload
+        }
     }
 
     const unsubscribeHtml = unsubscribeUrl
@@ -105,7 +130,8 @@ const sendTicketEmail = async (participant, event, ticketBuffer, unsubscribeUrl 
             fromName,
             to: participant.email,
             subject: `E-Ticket Resmi: ${event.name}`,
-            html
+            html,
+            attachmentUrl: ticketUrl // Mailketing akan melampirkan file dari URL ini
         });
 
         console.log(`[Mailketing] Ticket sent → ${participant.email}`);

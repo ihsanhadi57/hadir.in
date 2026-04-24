@@ -6,8 +6,18 @@ const QRCode = require('qrcode');
 const { Jimp } = require('jimp');
 const sharp = require('sharp');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 const emailService = require('../services/emailService');
 const { isValidEmailFormat, fixEmailTypo, hasValidMxRecord } = require('../utils/emailValidator');
+
+/**
+ * Helper: Fetch remote image URL into a Buffer for Sharp processing.
+ * Sharp cannot read remote URLs directly — only file paths or Buffers.
+ */
+const fetchImageAsBuffer = async (url) => {
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    return Buffer.from(response.data);
+};
 
 const registerManual = async (req, res) => {
     try {
@@ -353,7 +363,12 @@ const sendTicket = async (req, res) => {
                     composites.push({ input: svgText, left: Math.round(cfg.nameX), top: Math.round(cfg.nameY) });
                 }
 
-                finalImageBuffer = await sharp(event.ticketTemplateUrl).composite(composites).png().toBuffer();
+                // Fetch template dari URL Cloudinary sebagai Buffer (Sharp tidak bisa baca URL remote)
+                const templateBuffer = event.ticketTemplateUrl.startsWith('http')
+                    ? await fetchImageAsBuffer(event.ticketTemplateUrl)
+                    : event.ticketTemplateUrl; // fallback jika masih path lokal
+
+                finalImageBuffer = await sharp(templateBuffer).composite(composites).png().toBuffer();
             } catch (err) {
                 console.error('Gagal composite untuk', p.email, err);
             }
@@ -463,7 +478,12 @@ const blastTickets = async (req, res) => {
                         composites.push({ input: svgText, left: Math.round(cfg.nameX), top: Math.round(cfg.nameY) });
                     }
 
-                    finalImageBuffer = await sharp(event.ticketTemplateUrl).composite(composites).png().toBuffer();
+                    // Fetch template dari URL Cloudinary sebagai Buffer (Sharp tidak bisa baca URL remote)
+                    const templateBuffer = event.ticketTemplateUrl.startsWith('http')
+                        ? await fetchImageAsBuffer(event.ticketTemplateUrl)
+                        : event.ticketTemplateUrl; // fallback jika masih path lokal
+
+                    finalImageBuffer = await sharp(templateBuffer).composite(composites).png().toBuffer();
                 } catch (err) {
                     console.error('Gagal composite sharp untuk', p.email, err);
                 }
