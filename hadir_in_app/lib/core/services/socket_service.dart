@@ -7,6 +7,10 @@ import '../constants/api_config.dart';
 class SocketService {
   IO.Socket? _socket;
 
+  // Track joined rooms agar bisa re-join saat reconnect
+  String? _currentUserId;
+  String? _currentEventId;
+
   bool get isConnected => _socket?.connected ?? false;
 
   /// Connect ke Socket.IO server di Render.com.
@@ -33,6 +37,8 @@ class SocketService {
 
     _socket!.onConnect((_) {
       debugPrint('✅ [SocketService] Connected! ID: ${_socket!.id}');
+      // Re-join rooms setelah reconnect
+      _rejoinRooms();
     });
 
     _socket!.onConnectError((error) {
@@ -63,6 +69,18 @@ class SocketService {
     _socket!.connect();
   }
 
+  /// Re-join semua room setelah reconnect.
+  void _rejoinRooms() {
+    if (_currentUserId != null) {
+      debugPrint('🔄 [SocketService] Re-joining user room: $_currentUserId');
+      _socket!.emit('joinUserRoom', _currentUserId);
+    }
+    if (_currentEventId != null) {
+      debugPrint('🔄 [SocketService] Re-joining event room: $_currentEventId');
+      _socket!.emit('joinEvent', _currentEventId);
+    }
+  }
+
   /// Disconnect dari server.
   void disconnect() {
     debugPrint('🔌 [SocketService] Disconnecting...');
@@ -71,11 +89,54 @@ class SocketService {
     _socket = null;
   }
 
+  // ──────────────────────────────────────────────
+  // User Room (untuk event list updates)
+  // ──────────────────────────────────────────────
+
+  /// Bergabung ke room user untuk menerima event list updates.
+  /// Dipanggil setelah login berhasil.
+  void joinUserRoom(String userId) {
+    _currentUserId = userId;
+    if (_socket == null || !_socket!.connected) {
+      debugPrint('⚠️ [SocketService] Cannot joinUserRoom — not connected. Will join on connect.');
+      return;
+    }
+    debugPrint('📡 [SocketService] Joining user room: $userId');
+    _socket!.emit('joinUserRoom', userId);
+  }
+
+  /// Keluar dari room user.
+  void leaveUserRoom() {
+    if (_currentUserId != null && _socket != null && _socket!.connected) {
+      debugPrint('📡 [SocketService] Leaving user room: $_currentUserId');
+      _socket!.emit('leaveUserRoom', _currentUserId);
+    }
+    _currentUserId = null;
+  }
+
+  /// Listen untuk event list updated (create, update, delete event).
+  void onEventListUpdated(void Function() callback) {
+    _socket?.on('eventListUpdated', (data) {
+      debugPrint('📬 [SocketService] eventListUpdated received: $data');
+      callback();
+    });
+  }
+
+  /// Hapus listener eventListUpdated.
+  void offEventListUpdated() {
+    _socket?.off('eventListUpdated');
+  }
+
+  // ──────────────────────────────────────────────
+  // Event Room (untuk attendance updates)
+  // ──────────────────────────────────────────────
+
   /// Bergabung ke room event tertentu.
   /// Backend akan memasukkan socket ke room `event:{eventId}`.
   void joinEvent(String eventId) {
+    _currentEventId = eventId;
     if (_socket == null || !_socket!.connected) {
-      debugPrint('⚠️ [SocketService] Cannot joinEvent — not connected.');
+      debugPrint('⚠️ [SocketService] Cannot joinEvent — not connected. Will join on connect.');
       return;
     }
     debugPrint('📡 [SocketService] Joining event: $eventId');
@@ -84,6 +145,7 @@ class SocketService {
 
   /// Keluar dari room event.
   void leaveEvent(String eventId) {
+    _currentEventId = null;
     if (_socket == null || !_socket!.connected) {
       debugPrint('⚠️ [SocketService] Cannot leaveEvent — not connected.');
       return;

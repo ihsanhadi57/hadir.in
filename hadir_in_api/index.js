@@ -50,6 +50,18 @@ io.on('connection', (socket) => {
         console.log(`📡 Socket ${socket.id} left room event:${eventId}`);
     });
 
+    // Client join ke room user (untuk event list updates)
+    socket.on('joinUserRoom', (userId) => {
+        socket.join(`user:${userId}`);
+        console.log(`📡 Socket ${socket.id} joined room user:${userId}`);
+    });
+
+    // Client leave dari room user
+    socket.on('leaveUserRoom', (userId) => {
+        socket.leave(`user:${userId}`);
+        console.log(`📡 Socket ${socket.id} left room user:${userId}`);
+    });
+
     socket.on('disconnect', (reason) => {
         console.log(`⚠️ Socket disconnected: ${socket.id} — ${reason}`);
     });

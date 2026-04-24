@@ -27,6 +27,12 @@ const createEvent = async (req, res) => {
             }
         });
 
+        // ─── Emit Socket.IO: Notify user's event list to refresh ───
+        if (global.io) {
+            global.io.to(`user:${req.user.id}`).emit('eventListUpdated', { userId: req.user.id });
+            console.log(`📡 Socket: eventListUpdated emitted for user:${req.user.id}`);
+        }
+
         return res.status(201).json({
             status: "success",
             message: "Event berhasil dibuat.",
@@ -265,6 +271,11 @@ const updateEvent = async (req, res) => {
             }
         });
 
+        // ─── Emit Socket.IO: Notify event list to refresh ───
+        if (global.io) {
+            global.io.to(`user:${req.user.id}`).emit('eventListUpdated', { userId: req.user.id });
+        }
+
         return res.status(200).json({
             status: "success",
             message: "Event berhasil diperbarui.",
@@ -308,6 +319,11 @@ const deleteEvent = async (req, res) => {
 
         // 2. Hapus dari Database (Cascade delete akan menghapus log & participant)
         await prisma.event.delete({ where: { id: eventId } });
+
+        // ─── Emit Socket.IO: Notify event list to refresh ───
+        if (global.io) {
+            global.io.to(`user:${req.user.id}`).emit('eventListUpdated', { userId: req.user.id });
+        }
 
         return res.status(200).json({
             status: "success",

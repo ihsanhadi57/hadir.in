@@ -23,7 +23,7 @@ import 'location_picker_page.dart';
 import 'attendance_logs_page.dart';
 import '../../../../core/constants/api_config.dart';
 
-import '../widgets/log_detail_sheet.dart';
+// import '../widgets/log_detail_sheet.dart';
 import '../widgets/participant_range_picker_sheet.dart';
 import '../widgets/control_button.dart';
 import '../widgets/stat_card.dart';
@@ -38,12 +38,16 @@ class EventDetailPage extends StatefulWidget {
   State<EventDetailPage> createState() => _EventDetailPageState();
 }
 
+
 class _EventDetailPageState extends State<EventDetailPage> {
   final _repo = GetIt.instance<EventRepository>();
   final _socketService = GetIt.instance<SocketService>();
 
-  late Future<List<ParticipantModel>> _participantsFuture;
-  late Future<List<AttendanceLogModel>> _logsFuture;
+  // Cached data — null berarti belum pernah load
+  List<ParticipantModel>? _participants;
+  List<AttendanceLogModel>? _logs;
+  bool _isLoading = true;
+  String? _error;
 
   bool _isLive = false;
 
@@ -58,7 +62,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     _socketService.onAttendanceUpdated((eventId) {
       if (eventId == widget.event.id && mounted) {
         debugPrint('🔄 [EventDetail] Real-time update received, refreshing...');
-        _refresh();
+        _refresh(); // Silent refresh — no loading spinner
       }
     });
   }
@@ -71,11 +75,34 @@ class _EventDetailPageState extends State<EventDetailPage> {
     super.dispose();
   }
 
-  void _refresh() {
-    setState(() {
-      _participantsFuture = _repo.getParticipants(widget.event.id);
-      _logsFuture = _repo.getAttendanceLogs(widget.event.id);
-    });
+  Future<void> _refresh() async {
+    // Hanya tampilkan loading jika belum pernah ada data (first load)
+    if (_participants == null) {
+      setState(() => _isLoading = true);
+    }
+
+    try {
+      final results = await Future.wait([
+        _repo.getParticipants(widget.event.id),
+        _repo.getAttendanceLogs(widget.event.id),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _participants = results[0] as List<ParticipantModel>;
+          _logs = results[1] as List<AttendanceLogModel>;
+          _isLoading = false;
+          _error = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -87,110 +114,104 @@ class _EventDetailPageState extends State<EventDetailPage> {
           children: [
             _buildTopBar(),
             Expanded(
-              child: FutureBuilder(
-                future: Future.wait([_participantsFuture, _logsFuture]),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
+              child: _isLoading
+                  ? const Center(
                       child: CircularProgressIndicator(color: AppTheme.primary),
-                    ); // Blue loading
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-
-                  final data = snapshot.data as List;
-                  final participants = data[0] as List<ParticipantModel>;
-                  final logs = data[1] as List<AttendanceLogModel>;
-
-                  final total = participants.length;
-                  final attended = participants
-                      .where((p) => p.hasCheckedIn)
-                      .length;
-                  final absent = total - attended;
-
-                  // Target is mock 1500 for now, or total if total > 1500
-                  final absentPct = total > 0
-                      ? ((absent / total) * 100).toStringAsFixed(1)
-                      : '0';
-
-                  return RefreshIndicator(
-                    onRefresh: () async => _refresh(),
-                    color: AppTheme.primary,
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (widget.event.imageUrl != null) ...[
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(18),
-                              child: Image.network(
-                                widget.event.imageUrl!,
-                                width: double.infinity,
-                                height: 180,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                          _buildHeaderTitle(),
-                          const SizedBox(height: 16),
-                          _buildLocationInfoCard(),
-                          const SizedBox(height: 24),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ParticipantListPage(
-                                    eventId: widget.event.id,
-                                    initialParticipants: participants,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: _buildTotalCard(total),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: StatCard(
-                                  title: 'Hadir',
-                                  value: attended.toString(),
-                                  subtext: '+0 from last min',
-                                  subtextColor: const Color(0xFF10B981),
-                                  dotColor: const Color(0xFF10B981),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: StatCard(
-                                  title: 'Belum Datang',
-                                  value: absent.toString(),
-                                  subtext: '$absentPct% of total',
-                                  subtextColor: const Color(0xFF6B7280),
-                                  dotColor: const Color(0xFFEF4444),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 32),
-                          _buildEventControlSection(participants),
-                          const SizedBox(height: 32),
-                          _buildLogsSection(logs),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                    )
+                  : _error != null && _participants == null
+                      ? Center(child: Text('Error: $_error'))
+                      : _buildContent(),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    final participants = _participants!;
+    final logs = _logs!;
+
+    final total = participants.length;
+    final attended = participants
+        .where((p) => p.hasCheckedIn)
+        .length;
+    final absent = total - attended;
+
+    final absentPct = total > 0
+        ? ((absent / total) * 100).toStringAsFixed(1)
+        : '0';
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      color: AppTheme.primary,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 16,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.event.imageUrl != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Image.network(
+                  widget.event.imageUrl!,
+                  width: double.infinity,
+                  height: 180,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+            _buildHeaderTitle(),
+            const SizedBox(height: 16),
+            _buildLocationInfoCard(),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ParticipantListPage(
+                      eventId: widget.event.id,
+                      initialParticipants: participants,
+                    ),
+                  ),
+                );
+              },
+              child: _buildTotalCard(total),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: StatCard(
+                    title: 'Hadir',
+                    value: attended.toString(),
+                    subtext: '+0 from last min',
+                    subtextColor: const Color(0xFF10B981),
+                    dotColor: const Color(0xFF10B981),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: StatCard(
+                    title: 'Belum Datang',
+                    value: absent.toString(),
+                    subtext: '$absentPct% of total',
+                    subtextColor: const Color(0xFF6B7280),
+                    dotColor: const Color(0xFFEF4444),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            _buildEventControlSection(participants),
+            const SizedBox(height: 32),
+            _buildLogsSection(logs),
+            const SizedBox(height: 32),
           ],
         ),
       ),

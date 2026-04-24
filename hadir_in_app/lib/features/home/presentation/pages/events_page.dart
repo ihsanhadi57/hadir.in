@@ -3,8 +3,12 @@ import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/brand_text.dart';
+import '../../../../core/services/socket_service.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/data/repositories/event_repository.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/event_card.dart';
 import '../widgets/status_chip.dart';
 
@@ -17,23 +21,72 @@ class EventsPage extends StatefulWidget {
 
 class _EventsPageState extends State<EventsPage> {
   final _repo = GetIt.instance<EventRepository>();
-  late Future<List<EventModel>> _eventsFuture;
+  final _socketService = GetIt.instance<SocketService>();
+
+  // Cached data — null berarti belum pernah load
+  List<EventModel>? _events;
+  bool _isLoading = true;
+  String? _error;
+
   EventStatus? _selectedFilter; // null = semua
 
   @override
   void initState() {
     super.initState();
     _loadEvents();
+
+    // ─── Socket.IO: Join user room & listen for event list updates ───
+    _joinUserRoom();
+    _socketService.onEventListUpdated(() {
+      if (mounted) {
+        debugPrint('🔄 [EventsPage] Event list updated via socket, refreshing...');
+        _loadEvents();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _socketService.offEventListUpdated();
+    super.dispose();
+  }
+
+  /// Join user room berdasarkan userId dari AuthBloc.
+  void _joinUserRoom() {
+    final authState = context.read<AuthBloc>().state;
+    String? userId;
+    if (authState is AuthAuthenticated) {
+      userId = authState.userId;
+    } else if (authState is AuthLoginSuccess) {
+      userId = authState.user.id;
+    }
+    if (userId != null) {
+      _socketService.joinUserRoom(userId);
+    }
   }
 
   Future<void> _loadEvents() async {
-    setState(() {
-      _eventsFuture = _repo.getMyEvents();
-    });
+    // Hanya tampilkan loading shimmer jika belum pernah ada data (first load)
+    if (_events == null) {
+      setState(() => _isLoading = true);
+    }
+
     try {
-      await _eventsFuture;
-    } catch (_) {
-      // FutureBuilder will handle the error UI
+      final events = await _repo.getMyEvents();
+      if (mounted) {
+        setState(() {
+          _events = events;
+          _isLoading = false;
+          _error = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -52,20 +105,11 @@ class _EventsPageState extends State<EventsPage> {
           children: [
             _buildHeader(),
             Expanded(
-              child: FutureBuilder<List<EventModel>>(
-                future: _eventsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return _buildLoading();
-                  }
-                  if (snapshot.hasError) {
-                    return _buildError(snapshot.error.toString());
-                  }
-                  final all = snapshot.data ?? [];
-                  final filtered = _applyFilter(all);
-                  return _buildContent(all, filtered);
-                },
-              ),
+              child: _isLoading
+                  ? _buildLoading()
+                  : _error != null && _events == null
+                      ? _buildError(_error!)
+                      : _buildContent(_events!, _applyFilter(_events!)),
             ),
           ],
         ),
