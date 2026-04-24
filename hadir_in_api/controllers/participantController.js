@@ -19,6 +19,71 @@ const fetchImageAsBuffer = async (url) => {
     return Buffer.from(response.data);
 };
 
+/**
+ * Helper: Build composite ticket image (template + QR + nama).
+ * Handles dimension safety — clamps overlays so they never exceed template bounds.
+ *
+ * @param {Buffer} templateBuffer  - Buffer gambar template tiket
+ * @param {Object} cfg             - ticketConfig JSON { qrX, qrY, qrSize, nameX, nameY, nameSize, nameColor }
+ * @param {String} ticketId        - UUID untuk di-encode sebagai QR
+ * @param {String} participantName - Nama peserta untuk overlay teks
+ * @returns {Buffer} PNG buffer hasil composite
+ */
+const buildTicketImage = async (templateBuffer, cfg, ticketId, participantName) => {
+    // 1. Baca dimensi template
+    const templateMeta = await sharp(templateBuffer).metadata();
+    const tplW = templateMeta.width;
+    const tplH = templateMeta.height;
+    console.log(`[buildTicket] Template dimensions: ${tplW}x${tplH}`);
+
+    // 2. Hitung QR size & posisi yang aman
+    let qrSize = cfg.qrSize || 300;
+    let qrX = Math.round(cfg.qrX || 0);
+    let qrY = Math.round(cfg.qrY || 0);
+
+    // Clamp: QR tidak boleh melampaui batas template
+    if (qrX + qrSize > tplW) qrSize = Math.max(50, tplW - qrX);
+    if (qrY + qrSize > tplH) qrSize = Math.max(50, tplH - qrY);
+    if (qrX < 0) qrX = 0;
+    if (qrY < 0) qrY = 0;
+
+    // 3. Generate & resize QR
+    const qrBuffer = await QRCode.toBuffer(ticketId, {
+        errorCorrectionLevel: 'H', margin: 2, width: qrSize,
+    });
+    const qrResized = await sharp(qrBuffer).resize(qrSize, qrSize).png().toBuffer();
+    const composites = [{ input: qrResized, left: qrX, top: qrY }];
+
+    // 4. Overlay nama peserta (jika config ada)
+    if (cfg.nameX !== undefined && cfg.nameY !== undefined) {
+        const fontSize = cfg.nameSize || 48;
+        const color = cfg.nameColor || 'white';
+        const nameX = Math.round(cfg.nameX);
+        const nameY = Math.round(cfg.nameY);
+
+        // Lebar SVG = sisa ruang dari nameX sampai tepi kanan template
+        const svgWidth = Math.max(100, tplW - nameX);
+        const svgHeight = Math.min(fontSize + 20, Math.max(20, tplH - nameY));
+
+        const displayName = participantName
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        const svgText = Buffer.from(
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">`
+            + `<text x="0" y="${fontSize}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" fill="${color}" font-weight="bold">${displayName}</text>`
+            + `</svg>`
+        );
+        composites.push({ input: svgText, left: nameX, top: nameY });
+    }
+
+    // 5. Composite semua overlay ke template
+    const result = await sharp(templateBuffer).composite(composites).png().toBuffer();
+    console.log(`[buildTicket] ✅ Composite berhasil: ${(result.length / 1024).toFixed(1)}KB (${tplW}x${tplH})`);
+    return result;
+};
+
 const registerManual = async (req, res) => {
     try {
         const { eventId, name, email, noTelp } = req.body;
@@ -342,47 +407,29 @@ const sendTicket = async (req, res) => {
         console.log(`[sendTicket] ticketTemplateUrl: ${event.ticketTemplateUrl || '(kosong)'}`);
         console.log(`[sendTicket] ticketConfig: ${event.ticketConfig ? JSON.stringify(event.ticketConfig) : '(kosong)'}`);
 
-        const qrBuffer = await QRCode.toBuffer(p.ticketId, {
-            errorCorrectionLevel: 'H', margin: 2,
-            width: event.ticketConfig?.qrSize || 300,
-        });
-
-        let finalImageBuffer = qrBuffer;
+        let finalImageBuffer = null;
 
         if (event.ticketTemplateUrl && event.ticketConfig) {
             try {
                 console.log(`[sendTicket] ✅ Template ditemukan, memulai composite...`);
-                const cfg = event.ticketConfig;
-                const qrSize = cfg.qrSize || 300;
-
-                // Fetch template dari URL Cloudinary sebagai Buffer
                 const templateBuffer = event.ticketTemplateUrl.startsWith('http')
                     ? await fetchImageAsBuffer(event.ticketTemplateUrl)
                     : event.ticketTemplateUrl;
-                console.log(`[sendTicket] Template fetched: ${Buffer.isBuffer(templateBuffer) ? (templateBuffer.length / 1024).toFixed(1) + 'KB' : 'path lokal'}`);
 
-                const qrResized = await sharp(qrBuffer).resize(qrSize, qrSize).png().toBuffer();
-                const composites = [{ input: qrResized, left: Math.round(cfg.qrX || 0), top: Math.round(cfg.qrY || 0) }];
-
-                if (cfg.nameX !== undefined && cfg.nameY !== undefined) {
-                    const fontSize = cfg.nameSize || 48;
-                    const color = cfg.nameColor || 'white';
-                    const displayName = p.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    const svgText = Buffer.from(
-                        `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${fontSize + 20}">`
-                        + `<text x="0" y="${fontSize}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" fill="${color}" font-weight="bold">${displayName}</text>`
-                        + `</svg>`
-                    );
-                    composites.push({ input: svgText, left: Math.round(cfg.nameX), top: Math.round(cfg.nameY) });
-                }
-
-                finalImageBuffer = await sharp(templateBuffer).composite(composites).png().toBuffer();
-                console.log(`[sendTicket] ✅ Composite berhasil: ${(finalImageBuffer.length / 1024).toFixed(1)}KB`);
+                finalImageBuffer = await buildTicketImage(templateBuffer, event.ticketConfig, p.ticketId, p.name);
             } catch (err) {
                 console.error('[sendTicket] ❌ Gagal composite untuk', p.email, err.message);
             }
         } else {
             console.log(`[sendTicket] ⚠️ Template TIDAK ditemukan, mengirim QR saja`);
+        }
+
+        // Fallback: kirim QR saja jika composite gagal atau tidak ada template
+        if (!finalImageBuffer) {
+            finalImageBuffer = await QRCode.toBuffer(p.ticketId, {
+                errorCorrectionLevel: 'H', margin: 2,
+                width: event.ticketConfig?.qrSize || 300,
+            });
         }
 
         // Buat token unsubscribe
@@ -481,39 +528,22 @@ const blastTickets = async (req, res) => {
 
         // Loop over target participants
         for (const p of targetParticipants) {
-            const qrBuffer = await QRCode.toBuffer(p.ticketId, {
-                errorCorrectionLevel: 'H',
-                margin: 2,
-                width: event.ticketConfig?.qrSize || 300,
-            });
-
-            let finalImageBuffer = qrBuffer;
+            let finalImageBuffer = null;
 
             if (templateBuffer && event.ticketConfig) {
                 try {
-                    const cfg = event.ticketConfig;
-                    const qrSize = cfg.qrSize || 300;
-
-                    const qrResized = await sharp(qrBuffer).resize(qrSize, qrSize).png().toBuffer();
-                    const composites = [{ input: qrResized, left: Math.round(cfg.qrX || 0), top: Math.round(cfg.qrY || 0) }];
-
-                    if (cfg.nameX !== undefined && cfg.nameY !== undefined) {
-                        const fontSize = cfg.nameSize || 48;
-                        const color = cfg.nameColor || 'white';
-                        const displayName = p.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                        const svgText = Buffer.from(
-                            `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${fontSize + 20}">`
-                            + `<text x="0" y="${fontSize}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" fill="${color}" font-weight="bold">${displayName}</text>`
-                            + `</svg>`
-                        );
-                        composites.push({ input: svgText, left: Math.round(cfg.nameX), top: Math.round(cfg.nameY) });
-                    }
-
-                    finalImageBuffer = await sharp(templateBuffer).composite(composites).png().toBuffer();
-                    console.log(`[blastTickets] ✅ Composite ${p.email}: ${(finalImageBuffer.length / 1024).toFixed(1)}KB`);
+                    finalImageBuffer = await buildTicketImage(templateBuffer, event.ticketConfig, p.ticketId, p.name);
                 } catch (err) {
                     console.error(`[blastTickets] ❌ Gagal composite untuk ${p.email}:`, err.message);
                 }
+            }
+
+            // Fallback: kirim QR saja jika composite gagal
+            if (!finalImageBuffer) {
+                finalImageBuffer = await QRCode.toBuffer(p.ticketId, {
+                    errorCorrectionLevel: 'H', margin: 2,
+                    width: event.ticketConfig?.qrSize || 300,
+                });
             }
 
             try {
@@ -528,67 +558,67 @@ const blastTickets = async (req, res) => {
 
         console.log(`Proses blast tiket selesai untuk event ${event.name}`);
 
-        } catch (error) {
-            console.error("Error blastTickets:", error);
-        }
-    };
+    } catch (error) {
+        console.error("Error blastTickets:", error);
+    }
+};
 
-    // ─── Unsubscribe Handler ───
-    const unsubscribe = async (req, res) => {
-        try {
-            const { token } = req.query;
-            if (!token) return res.status(400).send("Token tidak valid.");
+// ─── Unsubscribe Handler ───
+const unsubscribe = async (req, res) => {
+    try {
+        const { token } = req.query;
+        if (!token) return res.status(400).send("Token tidak valid.");
 
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-            const participant = await prisma.participant.update({
-                where: { id: decoded.participantId },
-                data: { unsubscribed: true },
-                include: { event: true }
-            });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+        const participant = await prisma.participant.update({
+            where: { id: decoded.participantId },
+            data: { unsubscribed: true },
+            include: { event: true }
+        });
 
-            // Tampilkan halaman sukses sederhana
-            res.send(`
+        // Tampilkan halaman sukses sederhana
+        res.send(`
             <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
                 <h2 style="color: #4B5563;">Berhasil Berhenti Berlangganan</h2>
                 <p>Kamu tidak akan lagi menerima email blast dari event <strong>${participant.event.name}</strong>.</p>
             </div>
         `);
-        } catch (error) {
-            res.status(400).send("Token kadaluarsa atau tidak valid.");
-        }
-    };
+    } catch (error) {
+        res.status(400).send("Token kadaluarsa atau tidak valid.");
+    }
+};
 
-    // Endpoint untuk download template CSV
+// Endpoint untuk download template CSV
 
-    const downloadTemplate = async (req, res) => {
-        try {
-            // BOM + sep hint agar Excel otomatis parsing kolom dengan benar
-            const BOM = '\uFEFF';
-            const sepHint = 'sep=,\r\n';
-            const csvContent = [
-                'name,email,noTelp',
-                'Budi Santoso,budi@email.com,081234567890',
-                'Siti Aminah,siti@email.com,082345678901',
-                'Andi Pratama,andi@email.com,',
-            ].join('\r\n');
+const downloadTemplate = async (req, res) => {
+    try {
+        // BOM + sep hint agar Excel otomatis parsing kolom dengan benar
+        const BOM = '\uFEFF';
+        const sepHint = 'sep=,\r\n';
+        const csvContent = [
+            'name,email,noTelp',
+            'Budi Santoso,budi@email.com,081234567890',
+            'Siti Aminah,siti@email.com,082345678901',
+            'Andi Pratama,andi@email.com,',
+        ].join('\r\n');
 
-            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-            res.setHeader('Content-Disposition', 'attachment; filename="template_peserta_hadir_in.csv"');
-            return res.status(200).send(BOM + sepHint + csvContent);
-        } catch (error) {
-            console.error("Error downloadTemplate:", error);
-            return res.status(500).json({ status: "error", message: "Gagal membuat template." });
-        }
-    };
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="template_peserta_hadir_in.csv"');
+        return res.status(200).send(BOM + sepHint + csvContent);
+    } catch (error) {
+        console.error("Error downloadTemplate:", error);
+        return res.status(500).json({ status: "error", message: "Gagal membuat template." });
+    }
+};
 
-    module.exports = {
-        registerManual,
-        registerBulk,
-        getParticipants,
-        updateParticipant,
-        deleteParticipant,
-        sendTicket,
-        blastTickets,
-        downloadTemplate,
-        unsubscribe
-    };
+module.exports = {
+    registerManual,
+    registerBulk,
+    getParticipants,
+    updateParticipant,
+    deleteParticipant,
+    sendTicket,
+    blastTickets,
+    downloadTemplate,
+    unsubscribe
+};

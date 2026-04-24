@@ -8,6 +8,8 @@ cloudinary.config({
 });
 
 // Storage untuk Banner Event & Template Designer
+// Tidak ada transformation agar template tiket disimpan di resolusi aslinya
+// (koordinat QR/nama dari designer didasarkan pada dimensi asli gambar)
 const eventStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
@@ -15,7 +17,6 @@ const eventStorage = new CloudinaryStorage({
     return {
       folder: `hadirin/events/${eventId || 'misc'}`,
       allowed_formats: ['jpg', 'png', 'jpeg'],
-      transformation: [{ width: 1200, crop: 'limit' }]
     };
   }
 });
