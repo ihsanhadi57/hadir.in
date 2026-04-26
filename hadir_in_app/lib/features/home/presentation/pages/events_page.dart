@@ -252,8 +252,8 @@ class _EventsPageState extends State<EventsPage> {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 100),
       itemCount: 3,
-      itemBuilder: (_, __) => const Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+      itemBuilder: (_, _) => const Padding(
+        padding: EdgeInsets.only(bottom: 16),
         child: EventShimmerCard(),
       ),
     );

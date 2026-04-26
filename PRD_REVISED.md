@@ -37,17 +37,18 @@ Hadir.in is a smart attendance and ticketing system designed for flexibility. It
 *   **Geofencing**: Backend validation to compare participant's GPS with event coordinates during self-check-in.
 *   **Evidence System**: Photo capture requirement for self-check-in to prevent proxy attendance.
 *   **Real-Time Data**: Dashboard must update instantly when check-ins occur (Socket.io).
+*   **Payment & Monetization (Upcoming)**: Integration with payment gateways (Midtrans/Doku) for paid event ticketing.
 
 ### 3.2 Communication & UX
-*   **Email Engine**: Integration with AWS SES for reliable delivery of e-tickets.
+*   **Email Engine**: Integration with Mailketing for reliable delivery of e-tickets.
 *   **Gen Z Aesthetic**: Vibrant UI/UX, casual language, and minimal friction (no app required for participants).
 
 ## 4. Technical Stack
 *   **Frontend**: Flutter (Mobile App & Web).
 *   **Backend**: Node.js + Express.js.
 *   **Database**: PostgreSQL / MySQL with Prisma ORM.
-*   **Real-Time**: Socket.io (Pending implementation).
-*   **Cloud Services**: Cloudinary (Image storage), AWS SES (Email).
+*   **Real-Time**: Socket.io (Implemented).
+*   **Cloud Services**: Cloudinary (Image storage), Mailketing (Email).
 
 ## 5. Implementation Roadmap
 
@@ -58,10 +59,13 @@ Hadir.in is a smart attendance and ticketing system designed for flexibility. It
 *   [x] QR Scanner for Committee.
 *   [x] Self Check-In Web Interface with Photo & GPS.
 
-### Phase 2: Engagement & Real-Time (Next Steps)
-*   [/] Finalizing AWS SES Email Blast (In Progress).
-*   [ ] **Socket.io Integration**: Connecting backend check-in events to the Flutter Dashboard for real-time counters.
-*   [ ] Refined Geofencing logic for Committee Scans (Optional/Safety).
+### Phase 2: Engagement & Real-Time (Completed)
+*   [x] **Mailketing Email Blast**: Integration with Mailketing for reliable e-ticket delivery.
+*   [x] **Socket.io Integration**: Real-time event check-in counters connected to the Flutter Dashboard.
+
+### Phase 3: Monetization & Ticketing (Next Steps)
+*   [ ] **Payment Gateway Integration**: Integration with Midtrans and/or Doku for paid ticketing (Currently pending business review).
+*   [ ] **Paid Ticket Checkout Flow**: End-to-end checkout experience for participants buying premium tickets.
 
 ---
 

@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'dart:io' as io;
 import 'package:get_it/get_it.dart';
@@ -1200,7 +1201,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         ),
                         Switch(
                           value: requirePhoto,
-                          activeColor: AppTheme.primary,
+                          activeThumbColor: AppTheme.primary,
                           onChanged: (val) {
                             setDialogState(() {
                               requirePhoto = val;
@@ -1663,7 +1664,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               );
                             }
 
-                            if (!mounted) return;
+                            if (!context.mounted) return;
                             _refresh();
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -1672,7 +1673,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               ),
                             );
                           } catch (e) {
-                            if (!mounted) return;
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(e.toString()),

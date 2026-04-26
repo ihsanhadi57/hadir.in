@@ -228,7 +228,7 @@ class _DesignTicketPageState extends State<DesignTicketPage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -339,7 +339,7 @@ class _DesignTicketPageState extends State<DesignTicketPage> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
+                          color: Colors.black.withValues(alpha: 0.25),
                           blurRadius: 24,
                         ),
                       ],
@@ -387,8 +387,8 @@ class _DesignTicketPageState extends State<DesignTicketPage> {
                               height: _qrFractionSize * rw,
                               decoration: BoxDecoration(
                                 color: _editMode == _EditMode.qr
-                                    ? Colors.black.withOpacity(0.6)
-                                    : Colors.black.withOpacity(0.3),
+                                    ? Colors.black.withValues(alpha: 0.6)
+                                    : Colors.black.withValues(alpha: 0.3),
                                 border: Border.all(
                                   color: _editMode == _EditMode.qr
                                       ? Colors.white
@@ -430,8 +430,8 @@ class _DesignTicketPageState extends State<DesignTicketPage> {
                               ),
                               decoration: BoxDecoration(
                                 color: _editMode == _EditMode.name
-                                    ? AppTheme.primary.withOpacity(0.5)
-                                    : AppTheme.primary.withOpacity(0.2),
+                                    ? AppTheme.primary.withValues(alpha: 0.5)
+                                    : AppTheme.primary.withValues(alpha: 0.2),
                                 border: Border.all(
                                   color: _editMode == _EditMode.name
                                       ? Colors.white
@@ -661,7 +661,7 @@ class _ColorChip extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppTheme.primary.withOpacity(0.3),
+                    color: AppTheme.primary.withValues(alpha: 0.3),
                     blurRadius: 6,
                   ),
                 ]

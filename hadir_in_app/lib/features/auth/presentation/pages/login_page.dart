@@ -228,8 +228,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Password wajib diisi';
+                }
                 return null;
               },
             ),

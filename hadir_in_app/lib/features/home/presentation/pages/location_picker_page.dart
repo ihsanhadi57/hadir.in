@@ -79,8 +79,10 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
       if (permission == LocationPermission.deniedForever) return;
 
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 8),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 8),
+        ),
       );
 
       if (widget.initialLatitude == null) {
@@ -342,7 +344,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                         shrinkWrap: true,
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         itemCount: _searchResults.length,
-                        separatorBuilder: (_, __) => Divider(
+                        separatorBuilder: (_, _) => Divider(
                           height: 1,
                           color: const Color(0xFFE5E7EB).withValues(alpha: 0.5),
                           indent: 50,

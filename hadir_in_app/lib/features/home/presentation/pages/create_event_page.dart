@@ -396,8 +396,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
               hintText: 'contoh: Annual Tech Summit 2026',
             ),
             validator: (v) {
-              if (v == null || v.isEmpty)
+              if (v == null || v.isEmpty) {
                 return 'Nama event jangan sampai kosong ya';
+              }
               return null;
             },
           ),

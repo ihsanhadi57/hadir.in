@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/brand_text.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -254,8 +253,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Password wajib diisi';
+                }
                 if (value.length < 6) return 'Minimal 6 karakter';
                 return null;
               },
@@ -281,10 +281,12 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Konfirmasi wajib diisi';
-                if (value != _passwordController.text)
+                }
+                if (value != _passwordController.text) {
                   return 'Password tidak cocok';
+                }
                 return null;
               },
             ),

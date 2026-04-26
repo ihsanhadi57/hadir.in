@@ -364,7 +364,7 @@ class _ParticipantListPageState extends State<ParticipantListPage> {
                   vertical: 16,
                 ),
                 itemCount: _filteredParticipants.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final p = _filteredParticipants[index];
                   return _buildParticipantItem(p);

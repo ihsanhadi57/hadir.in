@@ -73,7 +73,7 @@ app.use(cors());
 app.use(express.json());
 // Serve uploaded files (template images) publicly
 app.use('/uploads', express.static('uploads'));
-app.use('/public', express.static('public'));
+app.use(express.static('public'));
 
 // Routes import
 const authRoutes = require('./routes/authRoutes');
@@ -87,110 +87,8 @@ const attendanceController = require('./controllers/attendanceController');
 
 // Route Landing Page Profesional
 app.get('/', (req, res) => {
-    const html = `
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hadir.in - Smart Attendance System</title>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-        <style>
-            :root {
-                --primary: #FF5F5F; /* Coral */
-                --secondary: #004AC6; /* Blue */
-                --bg: #FFFBF5; /* Cream */
-                --text: #1F2937;
-            }
-            body { 
-                font-family: 'Outfit', sans-serif; 
-                background-color: var(--bg); 
-                color: var(--text);
-                margin: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                overflow: hidden;
-            }
-            .container {
-                text-align: center;
-                padding: 40px;
-                max-width: 600px;
-                position: relative;
-                z-index: 1;
-            }
-            .logo-img {
-                width: 120px;
-                height: 120px;
-                object-fit: contain;
-                margin: 0 auto 24px;
-                display: block;
-                filter: drop-shadow(0 15px 30px rgba(255, 95, 95, 0.2));
-                animation: float 6s ease-in-out infinite;
-            }
-            h1 { font-size: 48px; font-weight: 800; margin: 0; letter-spacing: -1px; color: var(--secondary); }
-            span.highlight { color: var(--primary); }
-            p { font-size: 18px; color: #6B7280; line-height: 1.6; margin: 16px 0 32px; }
-            .badge {
-                background: white;
-                padding: 8px 16px;
-                border-radius: 100px;
-                font-size: 14px;
-                font-weight: 600;
-                color: var(--secondary);
-                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-                display: inline-block;
-                margin-bottom: 20px;
-            }
-            .status-dot {
-                width: 8px;
-                height: 8px;
-                background: #10B981;
-                border-radius: 50%;
-                display: inline-block;
-                margin-right: 8px;
-                box-shadow: 0 0 10px #10B981;
-            }
-            .grid-bg {
-                position: absolute;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background-image: radial-gradient(#FF5F5F22 1px, transparent 1px);
-                background-size: 40px 40px;
-                z-index: 0;
-            }
-            @keyframes float {
-                0% { transform: translateY(0px) rotate(-5deg); }
-                50% { transform: translateY(-20px) rotate(5deg); }
-                100% { transform: translateY(0px) rotate(-5deg); }
-            }
-            .btn-group { display: flex; gap: 12px; justify-content: center; }
-            .btn {
-                text-decoration: none;
-                padding: 14px 28px;
-                border-radius: 14px;
-                font-weight: 600;
-                transition: all 0.3s;
-            }
-            .btn-primary { background: var(--secondary); color: white; box-shadow: 0 10px 20px rgba(0, 74, 198, 0.2); }
-            .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0, 74, 198, 0.3); }
-        </style>
-    </head>
-    <body>
-        <div class="grid-bg"></div>
-        <div class="container">
-            <div class="badge"><span class="status-dot"></span> API Server Online</div>
-            <img src="/public/logo-no-bg.png" alt="Hadir.in Logo" class="logo-img">
-            <h1>Hadir<span class="highlight">.in</span></h1>
-            <p>Sistem Manajemen Kehadiran & Ticketing Event Pintar berbasis Cloud. Kelola ribuan peserta hanya dalam genggaman tangan.</p>
-            <div class="btn-group">
-                <a href="#" class="btn btn-primary">Download App</a>
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
-    res.send(html);
+    const path = require('path');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Route Self Check-in Landing Page

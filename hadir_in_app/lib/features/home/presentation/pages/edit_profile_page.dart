@@ -411,7 +411,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ),
               ),
-              if (trailing != null) trailing,
+              ?trailing,
             ],
           ),
           child,

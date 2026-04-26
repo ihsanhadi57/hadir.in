@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hadir.in - Smart Event Attendance System</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container nav-container">
+        <a href="#" class="logo-link">
+          <img src="logo.png" alt="Hadir.in Logo" class="logo" />
+          <span class="logo-text"
+            >hadir<span class="text-coral">.in</span></span
+          >
+        </a>
+        <ul class="nav-links">
+          <li><a href="#beranda">Beranda</a></li>
+          <li><a href="#masalah">Masalah</a></li>
+          <li><a href="#cara-kerja">Cara Kerja</a></li>
+          <li><a href="#untuk-siapa">Untuk Siapa</a></li>
+          <li><a href="#harga">Harga</a></li>
+          <li><a href="#kontak">Kontak</a></li>
+        </ul>
+        <a href="#" class="btn btn-coral" id="btn-coming-soon-nav"
+          >Coming Soon</a
+        >
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="beranda" class="hero">
+      <div class="container hero-container">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Event Kamu Masih <span class="text-coral">Absensi</span> Manual?
+          </h1>
+          <p class="hero-desc">
+            hadir.in adalah Smart Event Attendance System yang memastikan
+            kehadiran <span class="text-coral fw-bold">valid</span> dengan QR
+            Code, Foto, dan Lokasi.
+          </p>
+
+          <div class="hero-features">
+            <div class="hero-feature-item">
+              <div class="icon-box bg-blue-light">
+                <i data-lucide="qr-code" class="text-blue"></i>
+              </div>
+              <div>
+                <h4>Scan QR</h4>
+                <p>Check-in cepat dan praktis</p>
+              </div>
+            </div>
+            <div class="hero-feature-item">
+              <div class="icon-box bg-blue-light">
+                <i data-lucide="camera" class="text-blue"></i>
+              </div>
+              <div>
+                <h4>Foto & Lokasi</h4>
+                <p>Validasi kehadiran yang akurat</p>
+              </div>
+            </div>
+            <div class="hero-feature-item">
+              <div class="icon-box bg-blue-light">
+                <i data-lucide="bar-chart-2" class="text-blue"></i>
+              </div>
+              <div>
+                <h4>Real-time Monitor</h4>
+                <p>Pantau kehadiran secara langsung</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-cta">
+            <a href="#" class="btn btn-coral btn-lg" id="btn-coming-soon-hero"
+              >Coming Soon</a
+            >
+            <span class="dev-status">Currently in Development</span>
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="blob-bg"></div>
+          <img
+            src="mockup.png"
+            alt="Hadir.in App Interface"
+            class="phone-mockup"
+          />
+          <div class="floating-badge badge-validasi">
+            <div class="badge-icon bg-coral">
+              <i data-lucide="check" class="text-white"></i>
+            </div>
+            <div>
+              <h5>Validasi Otomatis Foto & Lokasi!</h5>
+              <div class="badge-sub"><i data-lucide="camera"></i> Foto</div>
+              <div class="badge-sub"><i data-lucide="map-pin"></i> Lokasi</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="masalah" class="problem bg-gray">
+      <div class="container">
+        <div class="section-header">
+          <span class="subtitle text-coral">MASALAH</span>
+          <div class="header-split">
+            <h2>Absensi Manual Selalu Bikin Repot</h2>
+            <p>
+              Proses manual memakan waktu, data tidak valid, dan rawan
+              kecurangan seperti titip hadir.
+            </p>
+          </div>
+        </div>
+        <div class="problem-cards">
+          <div class="card">
+            <div class="card-icon"><i data-lucide="clock"></i></div>
+            <h3>Memakan Banyak Waktu</h3>
+            <p>Proses check-in manual memperlambat jalannya event.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon"><i data-lucide="alert-circle"></i></div>
+            <h3>Data Tidak Valid</h3>
+            <p>Sulit memastikan kehadiran benar-benar asli.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon"><i data-lucide="users"></i></div>
+            <h3>Rawan Kecurangan</h3>
+            <p>Titip hadir mudah dilakukan tanpa validasi nyata.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it Works Section -->
+    <section id="cara-kerja" class="how-it-works">
+      <div class="container text-center">
+        <span class="subtitle text-blue">CARA KERJA</span>
+        <h2>Disesuaikan Untuk Segala Jenis Event</h2>
+
+        <div class="workflow-grid">
+          <!-- Event Tertutup -->
+          <div class="workflow-card">
+            <div class="workflow-header">
+              <div class="workflow-icon bg-coral">
+                <i data-lucide="mail" class="text-white"></i>
+              </div>
+              <h3>Event Tertutup (Privat)</h3>
+            </div>
+            <p class="workflow-desc">
+              Sistem pengiriman tiket khusus untuk event tertutup. Mencegah
+              penyusup dan pemalsuan tiket.
+            </p>
+            <div class="steps-vertical">
+              <div class="v-step">
+                <div class="v-step-num">1</div>
+                <div class="v-step-text">
+                  <strong>Buat Event & Kirim Tiket</strong>
+                  <p>
+                    Organizer mengunggah daftar email peserta, dan sistem akan
+                    otomatis mengirim E-Ticket (QR) ke masing-masing email.
+                  </p>
+                </div>
+              </div>
+              <div class="v-step">
+                <div class="v-step-num">2</div>
+                <div class="v-step-text">
+                  <strong>Organizer Scan QR Peserta</strong>
+                  <p>
+                    Saat acara berlangsung, Organizer bertugas melakukan
+                    pemindaian (scan) E-Ticket peserta di pintu masuk
+                    menggunakan aplikasi Hadir.in.
+                  </p>
+                </div>
+              </div>
+              <div class="v-step">
+                <div class="v-step-num">3</div>
+                <div class="v-step-text">
+                  <strong>Kehadiran Tervalidasi Aman</strong>
+                  <p>
+                    Sistem akan memverifikasi tiket secara real-time. Peserta
+                    gelap dengan tiket palsu akan langsung tertolak.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Terbuka -->
+          <div class="workflow-card">
+            <div class="workflow-header">
+              <div class="workflow-icon bg-blue">
+                <i data-lucide="users" class="text-white"></i>
+              </div>
+              <h3>Event Terbuka (Publik)</h3>
+            </div>
+            <p class="workflow-desc">
+              Cocok untuk absensi massal. Peserta melakukan absensi secara
+              mandiri tanpa daftar undangan awal.
+            </p>
+            <div class="steps-vertical">
+              <div class="v-step">
+                <div class="v-step-num">1</div>
+                <div class="v-step-text">
+                  <strong>Generate QR Absensi Utama</strong>
+                  <p>
+                    Organizer membuat event dan cukup menampilkan satu buah QR
+                    Code unik di proyektor layar utama atau mencetaknya.
+                  </p>
+                </div>
+              </div>
+              <div class="v-step">
+                <div class="v-step-num">2</div>
+                <div class="v-step-text">
+                  <strong>Peserta Self Check-in</strong>
+                  <p>
+                    Peserta membuka halaman website atau aplikasi Hadir.in di HP
+                    masing-masing lalu melakukan scan pada QR utama tersebut.
+                  </p>
+                </div>
+              </div>
+              <div class="v-step">
+                <div class="v-step-num">3</div>
+                <div class="v-step-text">
+                  <strong>Validasi Ketat (Anti Titip)</strong>
+                  <p>
+                    Sistem mengambil foto <b>selfie</b> dan <b>lokasi (GPS)</b>
+                    peserta saat scan berlangsung, memastikan kehadiran valid
+                    tanpa titip absen.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Untuk Siapa Section -->
+    <section id="untuk-siapa" class="target-audience">
+      <div class="container text-center">
+        <span class="subtitle text-coral">UNTUK SIAPA</span>
+        <h2>Cocok Untuk Berbagai Penyelenggara</h2>
+        <p class="section-desc">
+          Hadir.in dirancang fleksibel untuk mendukung segala skala acara Anda.
+        </p>
+
+        <div class="audience-grid">
+          <div class="audience-card">
+            <div class="audience-icon">
+              <i data-lucide="graduation-cap"></i>
+            </div>
+            <h3>Kampus & Sekolah</h3>
+            <p>
+              Ideal untuk seminar kampus, ospek, ujian, atau acara organisasi
+              mahasiswa.
+            </p>
+          </div>
+          <div class="audience-card">
+            <div class="audience-icon"><i data-lucide="briefcase"></i></div>
+            <h3>Perusahaan & Instansi</h3>
+            <p>
+              Solusi profesional untuk pelatihan karyawan, rapat tahunan, atau
+              workshop.
+            </p>
+          </div>
+          <div class="audience-card">
+            <div class="audience-icon"><i data-lucide="mic"></i></div>
+            <h3>Event Organizer (EO)</h3>
+            <p>
+              Sistem ticketing dan absensi andal untuk konser, pameran, dan
+              festival.
+            </p>
+          </div>
+          <div class="audience-card">
+            <div class="audience-icon">
+              <i data-lucide="heart-handshake"></i>
+            </div>
+            <h3>Komunitas</h3>
+            <p>
+              Praktis untuk mengelola kehadiran anggota di acara kopi darat atau
+              meetup rutin.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="harga" class="pricing bg-gray">
+      <div class="container text-center">
+        <span class="subtitle text-blue">PAKET EMAIL</span>
+        <h2>Pilih Paket Sesuai Kebutuhan Event-mu</h2>
+        <p class="section-desc">
+          Digunakan untuk mengirim e-ticket atau email ke peserta event.
+        </p>
+
+        <div class="pricing-cards">
+          <div class="price-card">
+            <div class="price-icon">
+              <i data-lucide="mail" class="text-green"></i>
+            </div>
+            <h3>500 Email</h3>
+            <div class="price">Rp 5.500</div>
+            <div class="price-sub">Rp 11 / email</div>
+            <ul class="features">
+              <li>
+                <i data-lucide="check-circle-2" class="text-green"></i>
+                Pengiriman email manual
+              </li>
+              <li>
+                <i data-lucide="check-circle-2" class="text-green"></i> Berlaku
+                tanpa batas waktu
+              </li>
+              <li>
+                <i data-lucide="check-circle-2" class="text-green"></i> Cocok
+                untuk event kecil
+              </li>
+            </ul>
+            <button class="btn btn-green btn-full btn-buy">
+              Beli Sekarang
+            </button>
+          </div>
+
+          <div class="price-card popular">
+            <div class="popular-badge">Terlaris 🔥</div>
+            <div class="price-icon">
+              <i data-lucide="mail" class="text-blue"></i>
+            </div>
+            <h3>1000 Email</h3>
+            <div class="price text-blue">Rp 10.500</div>
+            <div class="price-sub">Rp 10.5 / email</div>
+            <ul class="features">
+              <li>
+                <i data-lucide="check-circle-2" class="text-blue"></i>
+                Pengiriman email manual
+              </li>
+              <li>
+                <i data-lucide="check-circle-2" class="text-blue"></i> Berlaku
+                tanpa batas waktu
+              </li>
+              <li>
+                <i data-lucide="check-circle-2" class="text-blue"></i> Cocok
+                untuk event menengah
+              </li>
+            </ul>
+            <button class="btn btn-blue btn-full btn-buy">Beli Sekarang</button>
+          </div>
+
+          <div class="price-card">
+            <div class="price-icon">
+              <i data-lucide="mail" class="text-purple"></i>
+            </div>
+            <h3>2000 Email</h3>
+            <div class="price text-purple">Rp 20.000</div>
+            <div class="price-sub">Rp 10 / email (Hemat!)</div>
+            <ul class="features">
+              <li>
+                <i data-lucide="check-circle-2" class="text-purple"></i>
+                Pengiriman email manual
+              </li>
+              <li>
+                <i data-lucide="check-circle-2" class="text-purple"></i> Berlaku
+                tanpa batas waktu
+              </li>
+              <li>
+                <i data-lucide="check-circle-2" class="text-purple"></i> Cocok
+                untuk event besar
+              </li>
+            </ul>
+            <button class="btn btn-purple btn-full btn-buy">
+              Beli Sekarang
+            </button>
+          </div>
+        </div>
+        <div class="secure-payment">
+          <i data-lucide="lock" class="text-yellow"></i> Pembayaran aman via
+          Midtrans - Langsung aktif setelah bayar
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="kontak" class="footer">
+      <div class="container footer-container">
+        <div class="footer-brand">
+          <a href="#" class="logo-link">
+            <img src="logo.png" alt="Hadir.in Logo" class="logo" />
+            <span class="logo-text text-white"
+              >hadir<span class="text-coral">.in</span></span
+            >
+          </a>
+          <p>
+            Smart Event Attendance System yang memastikan kehadiran valid dengan
+            teknologi QR Code, foto, dan lokasi.
+          </p>
+          <div class="social-links">
+            <a
+              href="https://instagram.com/hadir.in.app"
+              target="_blank"
+              class="social-link"
+              ><i data-lucide="instagram" style="width: 20px; height: 20px; color: white; stroke: white;"></i></a>
+            <div class="social-placeholder"><i data-lucide="linkedin" style="width: 20px; height: 20px; color: white; stroke: white;"></i></div>
+            <div class="social-placeholder"><i data-lucide="twitter" style="width: 20px; height: 20px; color: white; stroke: white;"></i></div>
+            <div class="social-placeholder"><i data-lucide="youtube" style="width: 20px; height: 20px; color: white; stroke: white;"></i></div>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <div class="link-group">
+            <h4>Produk</h4>
+            <ul>
+              <li><a href="#masalah">Masalah</a></li>
+              <li><a href="#cara-kerja">Cara Kerja</a></li>
+              <li><a href="#untuk-siapa">Untuk Siapa</a></li>
+              <li><a href="#harga">Harga</a></li>
+            </ul>
+          </div>
+          <div class="link-group">
+            <h4>Perusahaan</h4>
+            <ul>
+              <li><a href="#">Tentang Kami</a></li>
+              <li><a href="privacy.html">Kebijakan Privasi</a></li>
+              <li><a href="tnc.html">Syarat & Ketentuan</a></li>
+              <li><a href="refund.html">Kebijakan Refund</a></li>
+            </ul>
+          </div>
+          <div class="link-group">
+            <h4>Kontak Kami</h4>
+            <ul class="contact-info">
+              <li><i data-lucide="mail"></i> tickets.hardirin.app@gmail.com</li>
+              <li><i data-lucide="phone"></i> 0823 7785 2004</li>
+              <li><i data-lucide="map-pin"></i> Jambi, Indonesia</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 hadir.in. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Modal Popup for App Download -->
+    <div id="downloadModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-header">
+          <div class="modal-icon"><i data-lucide="smartphone"></i></div>
+          <h2>Aplikasi Sedang Dalam Pengembangan</h2>
+        </div>
+        <p>
+          Fitur pembelian paket dan pembuatan event dilakukan sepenuhnya melalui
+          aplikasi mobile kami.
+        </p>
+        <p>
+          Aplikasi <strong>Hadir.in</strong> akan segera rilis di Google Play
+          Store!
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-blue btn-full" id="btn-close-modal">
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
