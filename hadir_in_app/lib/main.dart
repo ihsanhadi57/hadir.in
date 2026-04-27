@@ -12,8 +12,8 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
-import 'features/home/presentation/pages/join_event_page.dart';
-import 'features/home/presentation/pages/self_checkin_page.dart';
+import 'features/event/presentation/pages/join_event_page.dart';
+import 'features/event/presentation/pages/self_checkin_page.dart';
 
 import 'injection_container.dart' as di;
 import 'package:intl/date_symbol_data_local.dart';

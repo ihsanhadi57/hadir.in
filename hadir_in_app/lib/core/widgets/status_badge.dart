@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../event/data/models/event_model.dart';
+import '../theme/app_theme.dart';
+import '../../features/event/data/models/event_model.dart';
 
 class StatusBadge extends StatelessWidget {
   final EventStatus status;

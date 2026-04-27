@@ -5,8 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
-import '../../../event/data/repositories/event_repository.dart';
-import 'home_page.dart';
+import '../../data/repositories/event_repository.dart';
+import '../../../home/presentation/pages/home_page.dart';
 
 class JoinEventPage extends StatefulWidget {
   final String inviteCode;

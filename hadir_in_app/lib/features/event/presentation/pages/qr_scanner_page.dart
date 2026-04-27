@@ -3,7 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../event/data/repositories/event_repository.dart';
+import '../../data/repositories/event_repository.dart';
 
 class QRScannerPage extends StatefulWidget {
   final String eventId;

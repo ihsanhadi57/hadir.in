@@ -91,6 +91,12 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Route Web Dashboard (SPA catch-all)
+app.get('/app/dashboard.html', (req, res) => {
+    const path = require('path');
+    res.sendFile(path.join(__dirname, 'public', 'app', 'dashboard.html'));
+});
+
 // Route Self Check-in Landing Page
 app.get('/attend/:eventId', attendanceController.renderSelfCheckInPage);
 

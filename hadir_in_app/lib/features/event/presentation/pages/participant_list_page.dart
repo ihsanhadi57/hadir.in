@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../event/data/models/event_detail_models.dart';
+import '../../data/models/event_detail_models.dart';
 import 'package:get_it/get_it.dart';
-import '../../../event/data/repositories/event_repository.dart';
+import '../../data/repositories/event_repository.dart';
 
 class ParticipantListPage extends StatefulWidget {
   final String eventId;

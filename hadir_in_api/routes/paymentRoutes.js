@@ -8,5 +8,6 @@ router.post('/webhook', paymentController.handleWebhook);
 
 // Protected routes (Require login)
 router.post('/create-snap', authMiddleware, paymentController.createSnapTransaction);
+router.get('/history', authMiddleware, paymentController.getHistory);
 
 module.exports = router;

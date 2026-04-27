@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../event/data/repositories/event_repository.dart';
+import '../../data/repositories/event_repository.dart';
 
 class AddParticipantManualPage extends StatefulWidget {
   final String eventId;

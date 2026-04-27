@@ -33,13 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal Logic
     const modal = document.getElementById('downloadModal');
     const closeBtns = document.querySelectorAll('.close-modal, #btn-close-modal');
-    const triggerBtns = document.querySelectorAll('.btn-buy, #btn-coming-soon-nav, #btn-coming-soon-hero');
 
-    // Open Modal
-    triggerBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            modal.style.display = 'flex';
+    // Close Modal
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (modal) modal.style.display = 'none';
         });
     });
 

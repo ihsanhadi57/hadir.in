@@ -5,9 +5,9 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../auth/presentation/pages/login_page.dart';
-import 'events_page.dart';
-import 'create_event_page.dart';
-import 'account_page.dart';
+import '../../../event/presentation/pages/events_page.dart';
+import '../../../event/presentation/pages/create_event_page.dart';
+import '../../../profile/presentation/pages/account_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -7,7 +7,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../event/data/models/event_model.dart';
 import '../pages/event_detail_page.dart';
-import 'status_badge.dart';
+import '../../../../core/widgets/status_badge.dart';
 
 class EventCard extends StatelessWidget {
   final EventModel event;

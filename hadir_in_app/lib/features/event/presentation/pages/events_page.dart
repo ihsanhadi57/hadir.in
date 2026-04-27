@@ -4,13 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/brand_text.dart';
 import '../../../../core/services/socket_service.dart';
-import '../../../event/data/models/event_model.dart';
-import '../../../event/data/repositories/event_repository.dart';
+import '../../data/models/event_model.dart';
+import '../../data/repositories/event_repository.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/event_card.dart';
-import '../widgets/status_chip.dart';
+import '../../../../core/widgets/status_chip.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});

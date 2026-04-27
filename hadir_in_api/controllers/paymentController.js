@@ -60,6 +60,12 @@ const createSnapTransaction = async (req, res) => {
 
         const snapResponse = await snap.createTransaction(parameter);
 
+        // Update transaction with snapToken
+        await prisma.topupTransaction.update({
+            where: { orderId },
+            data: { snapToken: snapResponse.token }
+        });
+
         return res.status(200).json({
             status: 'success',
             data: {
@@ -152,7 +158,28 @@ const handleWebhook = async (req, res) => {
     }
 };
 
+const getHistory = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const transactions = await prisma.topupTransaction.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            take: 50,
+        });
+
+        return res.status(200).json({
+            status: 'success',
+            data: transactions
+        });
+    } catch (error) {
+        console.error("Error getHistory:", error);
+        return res.status(500).json({ status: 'error', message: 'Gagal mengambil riwayat transaksi.' });
+    }
+};
+
 module.exports = {
     createSnapTransaction,
-    handleWebhook
+    handleWebhook,
+    getHistory
 };

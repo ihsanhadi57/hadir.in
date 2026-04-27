@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Hadir.in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Midtrans Snap SDK (Sandbox) -->
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="Mid-client-L7hxXDpkeJvdIK8b"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- AUTH SCREEN (Login / Register / OTP)       -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-container">
+            <div class="auth-left">
+                <div class="auth-brand">
+                    <img src="../logo-no-bg.png" alt="Logo" class="auth-logo" />
+                    <h1>hadir<span class="text-coral">.in</span></h1>
+                    <p>Smart Event Attendance System</p>
+                </div>
+                <div class="auth-features-list">
+                    <div class="auth-feature"><i data-lucide="shield-check"></i><span>Kehadiran Valid & Anti Kecurangan</span></div>
+                    <div class="auth-feature"><i data-lucide="zap"></i><span>Check-in Instan dengan QR Code</span></div>
+                    <div class="auth-feature"><i data-lucide="bar-chart-2"></i><span>Pantau Kehadiran Real-time</span></div>
+                </div>
+            </div>
+            <div class="auth-right">
+                <!-- LOGIN FORM -->
+                <div id="login-form" class="auth-form-card">
+                    <h2>Masuk ke Akun Anda</h2>
+                    <p class="auth-subtitle">Kelola event dan kuota email Anda</p>
+                    <div id="login-error" class="auth-error"></div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" placeholder="contoh@email.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" placeholder="Masukkan password" />
+                    </div>
+                    <button class="btn-primary-auth" onclick="handleLogin()">
+                        <span id="login-btn-text">Masuk</span>
+                    </button>
+                    <div class="auth-divider"><span>atau</span></div>
+                    <div id="google-login-btn" class="google-btn-container"></div>
+                    <p class="auth-switch">Belum punya akun? <a href="#" onclick="showRegister()">Daftar di sini</a></p>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <div id="register-form" class="auth-form-card" style="display:none">
+                    <h2>Buat Akun Baru</h2>
+                    <p class="auth-subtitle">Gratis 50 kuota email untuk memulai</p>
+                    <div id="register-error" class="auth-error"></div>
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="reg-name" placeholder="Nama Anda" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="reg-email" placeholder="contoh@email.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" placeholder="Minimal 8 karakter" />
+                    </div>
+                    <button class="btn-primary-auth" onclick="handleRegister()">
+                        <span id="reg-btn-text">Daftar Sekarang</span>
+                    </button>
+                    <p class="auth-switch">Sudah punya akun? <a href="#" onclick="showLogin()">Masuk di sini</a></p>
+                </div>
+
+                <!-- OTP FORM -->
+                <div id="otp-form" class="auth-form-card" style="display:none">
+                    <div class="otp-icon"><i data-lucide="mail-check"></i></div>
+                    <h2>Verifikasi Email</h2>
+                    <p class="auth-subtitle">Masukkan kode OTP yang dikirim ke <strong id="otp-email-display"></strong></p>
+                    <div id="otp-error" class="auth-error"></div>
+                    <div class="form-group">
+                        <label>Kode OTP</label>
+                        <input type="text" id="otp-code" placeholder="000000" maxlength="6" class="otp-input" />
+                    </div>
+                    <button class="btn-primary-auth" onclick="handleVerifyOTP()">
+                        <span id="otp-btn-text">Verifikasi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- DASHBOARD (after login)                    -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="dashboard-screen" class="dashboard-screen" style="display:none">
+
+        <!-- TOP NAVBAR -->
+        <nav class="dash-navbar">
+            <div class="dash-nav-left">
+                <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+                <a href="/" class="dash-logo-link">
+                    <img src="../logo-no-bg.png" alt="Logo" class="dash-logo" />
+                    <span class="dash-logo-text">hadir<span class="text-coral">.in</span></span>
+                </a>
+            </div>
+            <div class="dash-nav-right">
+                <div class="dash-user-info" onclick="navigateTo('profile')">
+                    <div class="dash-avatar" id="user-avatar">U</div>
+                    <span class="dash-username" id="nav-username">User</span>
+                    <i data-lucide="chevron-down" style="width:16px;height:16px;"></i>
+                </div>
+            </div>
+        </nav>
+
+        <div class="dash-body">
+            <!-- SIDEBAR -->
+            <aside class="dash-sidebar" id="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-label">MAIN MENU</div>
+                    <button class="sidebar-item active" data-view="dashboard" onclick="navigateTo('dashboard')">
+                        <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+                    </button>
+                    <button class="sidebar-item" data-view="events" onclick="navigateTo('events')">
+                        <i data-lucide="calendar-days"></i><span>Semua Event</span>
+                    </button>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">PENGGUNAAN EMAIL</div>
+                    <button class="sidebar-item" data-view="topup" onclick="navigateTo('topup')">
+                        <i data-lucide="mail-plus"></i><span>Tambah Kuota Email</span>
+                    </button>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">RIWAYAT</div>
+                    <button class="sidebar-item" data-view="history" onclick="navigateTo('history')">
+                        <i data-lucide="receipt"></i><span>Riwayat Pembelian</span>
+                    </button>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">PENGATURAN</div>
+                    <button class="sidebar-item" data-view="profile" onclick="navigateTo('profile')">
+                        <i data-lucide="user-cog"></i><span>Profil</span>
+                    </button>
+                </div>
+                <div class="sidebar-help">
+                    <div class="help-icon"><i data-lucide="headphones"></i></div>
+                    <strong>Butuh Bantuan?</strong>
+                    <p>Hubungi tim kami jika ada kendala.</p>
+                    <a href="mailto:tickets.hardirin.app@gmail.com" class="help-btn">Hubungi Kami</a>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="dash-main" id="main-content">
+                <!-- Content will be injected by JS -->
+            </main>
+        </div>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

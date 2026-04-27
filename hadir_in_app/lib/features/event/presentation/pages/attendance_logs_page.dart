@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../event/data/models/event_detail_models.dart';
-import '../../../event/data/repositories/event_repository.dart';
+import '../../data/models/event_detail_models.dart';
+import '../../data/repositories/event_repository.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../widgets/log_card.dart';
 

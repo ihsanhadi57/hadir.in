@@ -7,7 +7,7 @@ import 'package:hadir_in_app/core/widgets/brand_text.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../event/data/repositories/event_repository.dart';
+import '../../data/repositories/event_repository.dart';
 import 'location_picker_page.dart';
 import '../../../../core/constants/api_config.dart';
 
