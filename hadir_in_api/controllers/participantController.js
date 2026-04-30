@@ -206,8 +206,12 @@ const registerBulk = async (req, res) => {
         // Tulis ulang file yang sudah bersih
         fs.writeFileSync(req.file.path, rawContent, 'utf-8');
 
+        // Deteksi separator dari baris pertama
+        const firstLine = rawContent.split('\n')[0];
+        const separator = firstLine.includes(';') && !firstLine.includes(',') ? ';' : ',';
+
         fs.createReadStream(req.file.path)
-            .pipe(csv())
+            .pipe(csv({ separator }))
             .on('data', (data) => {
                 if (data.name && data.email) {
                     let cleanedEmail = data.email.trim();

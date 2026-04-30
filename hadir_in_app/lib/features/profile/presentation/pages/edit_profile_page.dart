@@ -51,11 +51,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
-    context.read<AuthBloc>().add(UpdateProfileRequested(
-          name: _nameController.text.trim(),
-          currentPassword: _changePassword ? _currentPasswordController.text : null,
-          newPassword: _changePassword ? _newPasswordController.text : null,
-        ));
+    context.read<AuthBloc>().add(
+      UpdateProfileRequested(
+        name: _nameController.text.trim(),
+        currentPassword: _changePassword
+            ? _currentPasswordController.text
+            : null,
+        newPassword: _changePassword ? _newPasswordController.text : null,
+      ),
+    );
   }
 
   void _showSnackBar(String msg, Color color) {
@@ -74,7 +78,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthProfileUpdateSuccess) {
-          _showSnackBar('Profil berhasil diperbarui! ✨', AppTheme.success);
+          _showSnackBar('Profil berhasil diperbarui!', AppTheme.success);
           Navigator.pop(context);
         } else if (state is AuthFailure) {
           _showSnackBar(state.message, AppTheme.error);
@@ -86,8 +90,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
           backgroundColor: AppTheme.background,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded,
-                color: AppTheme.textPrimary, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios_rounded,
+              color: AppTheme.textPrimary,
+              size: 20,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -122,14 +129,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.primary.withValues(alpha: 0.3),
+                                  color: AppTheme.primary.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   blurRadius: 20,
                                   offset: const Offset(0, 6),
                                 ),
                               ],
                               image: widget.user.avatarUrl != null
                                   ? DecorationImage(
-                                      image: NetworkImage(widget.user.avatarUrl!),
+                                      image: NetworkImage(
+                                        widget.user.avatarUrl!,
+                                      ),
                                       fit: BoxFit.cover,
                                     )
                                   : null,
@@ -197,7 +208,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                     // ─── Ganti Password Toggle ───
                     GestureDetector(
-                      onTap: () => setState(() => _changePassword = !_changePassword),
+                      onTap: () =>
+                          setState(() => _changePassword = !_changePassword),
                       child: _buildSectionCard(
                         title: 'Keamanan Akun',
                         icon: Icons.lock_outline_rounded,
@@ -219,10 +231,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     TextFormField(
                                       controller: _currentPasswordController,
                                       obscureText: !_showCurrentPassword,
-                                      style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 14,
+                                      ),
                                       decoration: InputDecoration(
                                         hintText: 'Masukkan password lama',
-                                        prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                                        prefixIcon: const Icon(
+                                          Icons.lock_outline,
+                                          size: 20,
+                                        ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
                                             _showCurrentPassword
@@ -231,11 +248,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                             size: 20,
                                           ),
                                           onPressed: () => setState(
-                                              () => _showCurrentPassword = !_showCurrentPassword),
+                                            () => _showCurrentPassword =
+                                                !_showCurrentPassword,
+                                          ),
                                         ),
                                       ),
                                       validator: (v) {
-                                        if (_changePassword && (v == null || v.isEmpty)) {
+                                        if (_changePassword &&
+                                            (v == null || v.isEmpty)) {
                                           return 'Password lama wajib diisi';
                                         }
                                         return null;
@@ -247,10 +267,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     TextFormField(
                                       controller: _newPasswordController,
                                       obscureText: !_showNewPassword,
-                                      style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 14,
+                                      ),
                                       decoration: InputDecoration(
                                         hintText: 'Minimal 8 karakter',
-                                        prefixIcon: const Icon(Icons.key_outlined, size: 20),
+                                        prefixIcon: const Icon(
+                                          Icons.key_outlined,
+                                          size: 20,
+                                        ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
                                             _showNewPassword
@@ -259,13 +284,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                             size: 20,
                                           ),
                                           onPressed: () => setState(
-                                              () => _showNewPassword = !_showNewPassword),
+                                            () => _showNewPassword =
+                                                !_showNewPassword,
+                                          ),
                                         ),
                                       ),
                                       validator: (v) {
                                         if (_changePassword) {
-                                          if (v == null || v.isEmpty) return 'Password baru wajib diisi';
-                                          if (v.length < 8) return 'Minimal 8 karakter';
+                                          if (v == null || v.isEmpty)
+                                            return 'Password baru wajib diisi';
+                                          if (v.length < 8)
+                                            return 'Minimal 8 karakter';
                                         }
                                         return null;
                                       },
@@ -276,10 +305,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     TextFormField(
                                       controller: _confirmPasswordController,
                                       obscureText: !_showConfirmPassword,
-                                      style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 14,
+                                      ),
                                       decoration: InputDecoration(
                                         hintText: 'Ulangi password baru',
-                                        prefixIcon: const Icon(Icons.check_circle_outline, size: 20),
+                                        prefixIcon: const Icon(
+                                          Icons.check_circle_outline,
+                                          size: 20,
+                                        ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
                                             _showConfirmPassword
@@ -288,11 +322,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                             size: 20,
                                           ),
                                           onPressed: () => setState(
-                                              () => _showConfirmPassword = !_showConfirmPassword),
+                                            () => _showConfirmPassword =
+                                                !_showConfirmPassword,
+                                          ),
                                         ),
                                       ),
                                       validator: (v) {
-                                        if (_changePassword && (v == null || v.isEmpty)) {
+                                        if (_changePassword &&
+                                            (v == null || v.isEmpty)) {
                                           return 'Konfirmasi password wajib diisi';
                                         }
                                         return null;
@@ -342,7 +379,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       width: 22,
                                       height: 22,
                                       child: CircularProgressIndicator(
-                                          color: Colors.white, strokeWidth: 2.5),
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
                                     )
                                   : Text(
                                       'Simpan Perubahan',

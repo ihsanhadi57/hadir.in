@@ -453,9 +453,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
             ],
           ),
           const SizedBox(height: 16),
-
-          const SizedBox(height: 16),
-
           // CONTACT EMAIL
           _buildFieldLabel('EMAIL KONTAK (REPLY-TO)'),
           const SizedBox(height: 6),
@@ -472,19 +469,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
             ),
           ),
           const SizedBox(height: 16),
-          TextFormField(
-            controller: _venueController,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              color: AppTheme.textPrimary,
-            ),
-            decoration: const InputDecoration(
-              hintText: 'Cari lokasi atau alamat',
-              prefixIcon: Icon(Icons.location_on_outlined, size: 20),
-            ),
-          ),
-          const SizedBox(height: 12),
-
           // MAP PREVIEW
           _buildMapPreview(),
         ],
