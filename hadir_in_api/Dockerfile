@@ -25,6 +25,11 @@ RUN npx prisma generate
 # --- STAGE 2: Run ---
 FROM node:22-alpine AS runner
 
+# Install fontconfig dan font agar SVG text rendering (nama peserta di tiket) berfungsi.
+# Tanpa ini, sharp/librsvg tidak bisa menemukan font dan teks menjadi invisible.
+RUN apk add --no-cache fontconfig font-noto font-noto-extra ttf-dejavu ttf-freefont \
+    && fc-cache -fv
+
 # Tentukan environment
 ENV NODE_ENV=production
 

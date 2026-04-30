@@ -92,10 +92,11 @@ const buildTicketImage = async (templateBuffer, cfg, ticketId, participantName) 
 
         const svgText = Buffer.from(
             `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">`
-            + `<text x="0" y="${fontSize}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" fill="${color}" font-weight="bold">${displayName}</text>`
+            + `<text x="0" y="${fontSize}" font-family="DejaVu Sans, Noto Sans, Arial, Helvetica, sans-serif" font-size="${fontSize}" fill="${color}" font-weight="bold">${displayName}</text>`
             + `</svg>`
         );
         composites.push({ input: svgText, left: nameX, top: nameY });
+        console.log(`[buildTicket] 📝 Name overlay: "${participantName}" at (${nameX},${nameY}), font=${fontSize}px, color=${color}, svgSize=${svgWidth}x${svgHeight}`);
     }
 
     // 5. Composite semua overlay ke template
