@@ -211,7 +211,17 @@ const registerBulk = async (req, res) => {
         const separator = firstLine.includes(';') && !firstLine.includes(',') ? ';' : ',';
 
         fs.createReadStream(req.file.path)
-            .pipe(csv({ separator }))
+            .pipe(csv({ 
+                separator,
+                mapHeaders: ({ header }) => {
+                    // Bersihkan karakter aneh seperti BOM ganda atau spasi tersembunyi
+                    let cleanHeader = header.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+                    if (cleanHeader.includes('name')) return 'name';
+                    if (cleanHeader.includes('email')) return 'email';
+                    if (cleanHeader.includes('notelp') || cleanHeader.includes('phone')) return 'noTelp';
+                    return header;
+                }
+            }))
             .on('data', (data) => {
                 if (data.name && data.email) {
                     let cleanedEmail = data.email.trim();
