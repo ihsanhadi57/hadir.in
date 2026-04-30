@@ -9,6 +9,13 @@ let snap = new midtransClient.Snap({
     clientKey: process.env.MIDTRANS_CLIENT_KEY
 });
 
+// Programmatically override Midtrans Notification URL to our current API domain
+if (process.env.BASE_URL) {
+    const webhookUrl = `${process.env.BASE_URL}/api/payment/webhook`;
+    snap.httpClient.http_client.defaults.headers.common['X-Override-Notification'] = webhookUrl;
+    console.log(`[Midtrans] Set X-Override-Notification to: ${webhookUrl}`);
+}
+
 const createSnapTransaction = async (req, res) => {
     try {
         const { quota, amount } = req.body;

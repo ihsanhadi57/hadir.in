@@ -66,17 +66,47 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   }
 
   /// Coba ambil lokasi saat ini
-  Future<void> _tryGetCurrentLocation() async {
+  Future<void> _tryGetCurrentLocation({bool isUserAction = false}) async {
+    if (isUserAction && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Mencari lokasi saat ini...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
+      if (!serviceEnabled) {
+        if (isUserAction && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('GPS tidak aktif. Mohon nyalakan GPS Anda.')),
+          );
+        }
+        return;
+      }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return;
+        if (permission == LocationPermission.denied) {
+          if (isUserAction && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Izin akses lokasi ditolak.')),
+            );
+          }
+          return;
+        }
       }
-      if (permission == LocationPermission.deniedForever) return;
+      if (permission == LocationPermission.deniedForever) {
+        if (isUserAction && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Izin akses lokasi ditolak permanen.')),
+          );
+        }
+        return;
+      }
 
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -85,16 +115,21 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
         ),
       );
 
-      if (widget.initialLatitude == null) {
-        // Hanya auto-locate jika belum ada initial location
+      if (widget.initialLatitude == null || isUserAction) {
+        // Auto-locate jika belum ada initial location ATAU jika ditekan user
         setState(() {
           _selectedLocation = LatLng(position.latitude, position.longitude);
         });
         _mapController.move(_selectedLocation, 16);
         _reverseGeocode(_selectedLocation);
       }
-    } catch (_) {
+    } catch (e) {
       // Gagal ambil lokasi, pakai default
+      if (isUserAction && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mendapatkan lokasi: $e')),
+        );
+      }
     }
   }
 
@@ -223,6 +258,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
                   subdomains: const ['a', 'b', 'c', 'd'],
                   userAgentPackageName: 'com.hadirin.app',
+                  retinaMode: RetinaMode.isHighDensity(context),
                 ),
                 MarkerLayer(
                   markers: [
@@ -382,7 +418,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
               right: 16,
               bottom: 240,
               child: GestureDetector(
-                onTap: _tryGetCurrentLocation,
+                onTap: () => _tryGetCurrentLocation(isUserAction: true),
                 child: Container(
                   width: 48,
                   height: 48,

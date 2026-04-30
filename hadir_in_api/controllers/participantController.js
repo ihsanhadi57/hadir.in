@@ -41,11 +41,16 @@ const buildTicketImage = async (templateBuffer, cfg, ticketId, participantName) 
     let qrX = Math.round(cfg.qrX || 0);
     let qrY = Math.round(cfg.qrY || 0);
 
-    // Clamp: QR tidak boleh melampaui batas template
-    if (qrX + qrSize > tplW) qrSize = Math.max(50, tplW - qrX);
-    if (qrY + qrSize > tplH) qrSize = Math.max(50, tplH - qrY);
+    // Clamp QR position
     if (qrX < 0) qrX = 0;
     if (qrY < 0) qrY = 0;
+    if (qrX > tplW - 50) qrX = tplW - 50;
+    if (qrY > tplH - 50) qrY = tplH - 50;
+
+    // Clamp QR size
+    if (qrX + qrSize > tplW) qrSize = tplW - qrX;
+    if (qrY + qrSize > tplH) qrSize = tplH - qrY;
+    if (qrSize < 50) qrSize = 50;
 
     // 3. Generate & resize QR
     const qrBuffer = await QRCode.toBuffer(ticketId, {
@@ -58,12 +63,27 @@ const buildTicketImage = async (templateBuffer, cfg, ticketId, participantName) 
     if (cfg.nameX !== undefined && cfg.nameY !== undefined) {
         const fontSize = cfg.nameSize || 48;
         const color = cfg.nameColor || 'white';
-        const nameX = Math.round(cfg.nameX);
-        const nameY = Math.round(cfg.nameY);
+        let nameX = Math.round(cfg.nameX);
+        let nameY = Math.round(cfg.nameY);
+
+        // Pastikan nameX dan nameY tidak di luar template
+        if (nameX < 0) nameX = 0;
+        if (nameY < 0) nameY = 0;
+        if (nameX > tplW - 10) nameX = tplW - 10;
+        if (nameY > tplH - 10) nameY = tplH - 10;
 
         // Lebar SVG = sisa ruang dari nameX sampai tepi kanan template
-        const svgWidth = Math.max(100, tplW - nameX);
-        const svgHeight = Math.min(fontSize + 20, Math.max(20, tplH - nameY));
+        let svgWidth = tplW - nameX;
+        if (svgWidth < 50) {
+             svgWidth = 50;
+             nameX = tplW - 50; // geser kiri agar muat
+        }
+        
+        let svgHeight = Math.min(fontSize + 20, tplH - nameY);
+        if (svgHeight < 20) {
+             svgHeight = 20;
+             nameY = tplH - 20; // geser atas agar muat
+        }
 
         const displayName = participantName
             .replace(/&/g, '&amp;')
