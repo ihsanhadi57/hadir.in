@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Birthday</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&family=Dancing+Script:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        /* Background gradient moved to canvas for fullscreen effect */
+        background: #0a0514;
+        min-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        color: #fff;
+        font-family: "Inter", sans-serif;
+      }
+
+      /* Canvas now covers the entire screen and stays fixed in background */
+      canvas {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1; /* behind everything else */
+        cursor: grab;
+        touch-action: none;
+        /* Optional: filter: drop-shadow(0 0 30px rgba(160, 100, 255, 0.2)); */
+      }
+      canvas:active {
+        cursor: grabbing;
+      }
+
+      /* Hero Section */
+      .hero {
+        position: relative;
+        width: 100%;
+        height: 100vh; /* perfectly fill the viewport */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        pointer-events: none; /* Let clicks pass through to the canvas */
+      }
+      .hero > * {
+        pointer-events: auto; /* Allow interactions with text if needed */
+      }
+
+      .glass-container {
+        position: absolute;
+        top: 12%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        animation: fadeInDown 1.5s ease-out forwards;
+      }
+      #title {
+        font-family: "Playfair Display", serif;
+        color: #f8d7a0;
+        font-size: 36px;
+        letter-spacing: 4px;
+        margin-bottom: 4px;
+        font-style: italic;
+        text-shadow: 0 4px 15px rgba(248, 215, 160, 0.4);
+      }
+      #subtitle {
+        color: #c9a0dc;
+        font-size: 14px;
+        font-weight: 300;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        opacity: 0.8;
+      }
+
+      .canvas-hint {
+        position: absolute;
+        bottom: 8%;
+        color: #8b7ca8;
+        font-size: 12px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        font-weight: 300;
+        pointer-events: none;
+        animation: pulse 2s infinite;
+      }
+
+      /* Scroll indicator */
+      .scroll-down {
+        position: absolute;
+        bottom: 3%;
+        font-size: 24px;
+        color: #8b7ca8;
+        animation: bounce 2s infinite;
+        opacity: 0.6;
+      }
+
+      /* Letter Section */
+      .letter-section {
+        position: relative;
+        z-index: 5;
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* This perfectly centers the envelope vertically */
+        padding: 20px 15px;
+        /* Soft gradient to make letter readable over stars */
+        background: linear-gradient(
+          180deg,
+          transparent 0%,
+          rgba(10, 5, 20, 0.85) 15%,
+          rgba(5, 2, 10, 1) 100%
+        );
+      }
+
+      .envelope-container {
+        position: relative;
+        width: 100%;
+        max-width: 450px;
+        height: 240px;
+        cursor: pointer;
+        transition: transform 0.4s;
+        perspective: 1200px;
+        margin: 0 auto;
+      }
+      .envelope-container:hover {
+        transform: translateY(-5px);
+      }
+
+      .envelope-back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #4a2b6e 0%, #2e154a 100%);
+        border-radius: 8px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      }
+
+      .envelope-front {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #3e225e;
+        border-radius: 8px;
+        z-index: 3;
+        clip-path: polygon(0 100%, 0 0, 50% 50%, 100% 0, 100% 100%);
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .envelope-flap {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 65%;
+        background: #522d7a;
+        border-radius: 8px 8px 0 0;
+        z-index: 4;
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        transform-origin: top;
+        transition:
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          z-index 0s 0.3s;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .envelope-container.open .envelope-flap {
+        transform: rotateX(180deg);
+        z-index: 1;
+        transition:
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          z-index 0s 0s;
+      }
+
+      .letter {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
+        height: 210px;
+        background: #fdfaf6;
+        border-radius: 6px;
+        z-index: 2;
+        padding: 35px 30px;
+        transition:
+          transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+          height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        color: #333;
+      }
+
+      .envelope-container.open .letter {
+        transform: translateY(-90px);
+        height: auto;
+        min-height: 400px;
+        z-index: 5;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .letter-content {
+        opacity: 0;
+        transition: opacity 0.5s 0.4s;
+      }
+      .envelope-container.open .letter-content {
+        opacity: 1;
+      }
+
+      .letter h2 {
+        font-family: "Dancing Script", cursive;
+        font-size: 32px;
+        color: #5a3585;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .letter p {
+        font-family: "Inter", sans-serif;
+        font-size: 14px;
+        line-height: 1.8;
+        margin-bottom: 15px;
+        color: #4a4a4a;
+      }
+
+      .letter .signature {
+        margin-top: 35px;
+        font-family: "Dancing Script", cursive;
+        font-size: 24px;
+        color: #5a3585;
+        text-align: right;
+      }
+
+      .tap-hint {
+        color: #8b7ca8;
+        font-size: 12px;
+        margin-top: 40px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0.4;
+        }
+      }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      @media (min-width: 768px) {
+        #title {
+          font-size: 52px;
+        }
+        #subtitle {
+          font-size: 18px;
+        }
+        .letter {
+          padding: 45px 40px;
+        }
+        .envelope-container {
+          max-width: 500px;
+          height: 280px;
+        }
+        .letter {
+          height: 250px;
+        }
+        .envelope-container.open .letter {
+          min-height: 450px;
+          transform: translateY(-110px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- FIXED CANVAS BACKGROUND -->
+    <canvas id="c"></canvas>
+
+    <!-- HERO GLOBE SECTION -->
+    <div class="hero">
+      <div class="glass-container">
+        <div id="title">Happy Birthday</div>
+        <div id="subtitle">my love &hearts;</div>
+      </div>
+
+      <!-- Note: globe is drawn dynamically by canvas -->
+      <div class="canvas-hint">drag to spin &middot; stars = her photos</div>
+      <div class="scroll-down">&darr;</div>
+    </div>
+
+    <!-- LETTER SECTION -->
+    <div class="letter-section">
+      <div
+        class="envelope-container"
+        id="envelope"
+        onclick="this.classList.toggle('open')"
+      >
+        <div class="envelope-back"></div>
+        <div class="letter">
+          <div class="letter-content">
+            <h2>Happy Birthday, Sayang</h2>
+
+            <!-- ============================================================ -->
+            <!-- ISI PUISI DAN UCAPAN DI BAWAH INI -->
+            <!-- ============================================================ -->
+            <p>
+              Happy birthday. A year ago today, you came into my life, and since
+              then my love for you has been like a flower that never stops
+              blooming, bigger and more beautiful every single day.
+            </p>
+            <p>
+              I'm sorry for the times I wasn't the man you hoped for. For the
+              disagreements, the mistakes, and yes, even for not letting the
+              world see how beautiful you are as much as you'd like. I'm still
+              learning, and I promise I'll keep trying. But know this, the way I
+              love you today is greater than yesterday, and tomorrow it will be
+              greater still.
+            </p>
+            <p>
+              Terima kasih sudah menjadi alasan di balik senyumku setiap hari.
+              Semoga tahun ini membawa lebih banyak kebahagiaan untuk kita. I
+              love you sayang
+            </p>
+            <p>Amaze, Amaze, Amaze 👎👎👎</p>
+            <!-- ============================================================ -->
+
+            <div class="signature">- Ihsan Hadi, your rocky</div>
+          </div>
+        </div>
+        <div class="envelope-front"></div>
+        <div class="envelope-flap"></div>
+      </div>
+      <div class="tap-hint">Tap envelope to open / close</div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("c");
+      const ctx = canvas.getContext("2d");
+
+      let W, H, cx, cy, SIZE, globeR, orbitBaseR;
+      let bg = [];
+      let gpts = [];
+      let stars = [];
+
+      // ============================================================
+      // ADD HER PHOTOS HERE
+      // Tambahkan lebih banyak null atau URL jika ingin lebih banyak foto.
+      // Format abstrak: foto akan menyebar di seluruh koordinat bola.
+      // ============================================================
+      const PHOTO_URLS = [
+        "/cl/cl1.jpeg",
+        "/cl/cl2.jpeg",
+        "/cl/cl3.jpeg",
+        "/cl/cl4.jpeg",
+        "/cl/cl5.jpeg",
+        "/cl/cl6.jpeg",
+        "/cl/cl7.jpeg",
+        "/cl/cl8.jpeg",
+        "/cl/cl9.jpeg",
+        "/cl/cl10.jpeg",
+        "/cl/cl11.jpeg",
+        "/cl/cl12.jpeg",
+        "/cl/cl13.jpeg",
+        "/cl/cl14.jpeg",
+        "/cl/cl15.jpeg",
+        "/cl/cl16.jpeg",
+        "/cl/cl17.jpeg",
+      ];
+
+      // Initialize abstract stars data ONCE
+      const starsData = PHOTO_URLS.map((url, i) => {
+        // Posisi abstrak (random latitude dan longitude)
+        const lat = ((Math.random() * 140 - 70) * Math.PI) / 180;
+        const lon = Math.random() * Math.PI * 2;
+        const randomRMultiplier = 0.8 + Math.random() * 0.8;
+        const randomSzMultiplier = 0.15 + Math.random() * 0.03;
+
+        const s = {
+          lat,
+          lon,
+          randomRMultiplier,
+          randomSzMultiplier,
+          img: null,
+          loaded: false,
+          gph: Math.random() * Math.PI * 2,
+        };
+
+        if (url) {
+          const img = new Image();
+          // onload & onerror must be set BEFORE setting src
+          img.onload = () => {
+            s.img = img;
+            s.loaded = true;
+          };
+          img.onerror = () => console.error("Gagal memuat foto:", url);
+          // Jangan gunakan crossOrigin untuk file lokal/same-origin
+          img.src = url;
+          // Jika gambar sudah di-cache browser, onload tidak trigger lagi
+          if (img.complete && img.naturalWidth > 0) {
+            s.img = img;
+            s.loaded = true;
+          }
+        }
+
+        return s;
+      });
+
+      function resize() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
+        cx = W / 2;
+        cy = H / 2;
+
+        // Cap the size so it doesn't get ridiculously huge on desktop
+        SIZE = Math.min(W, H, 750);
+        globeR = SIZE * 0.245;
+        orbitBaseR = SIZE * 0.38;
+
+        // Re-init background stars covering the FULL SCREEN
+        bg = [];
+        const bgCount = Math.floor((W * H) / 2500); // adjust density
+        for (let i = 0; i < bgCount; i++)
+          bg.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 1.5 + 0.3,
+            a: Math.random() * 0.7 + 0.2,
+            ph: Math.random() * Math.PI * 2,
+            sp: Math.random() * 0.015 + 0.005,
+          });
+
+        // Re-init globe grid dots
+        gpts = [];
+        for (let lat = -75; lat <= 75; lat += 15) {
+          const c = Math.max(
+            5,
+            Math.round(Math.cos((lat * Math.PI) / 180) * 16),
+          );
+          for (let i = 0; i < c; i++)
+            gpts.push({
+              lat: (lat * Math.PI) / 180,
+              lon: (i / c) * Math.PI * 2,
+            });
+        }
+
+        // Map sizes to the stars
+        stars = starsData.map((s) => {
+          return {
+            ...s,
+            r: orbitBaseR * s.randomRMultiplier,
+            sz: SIZE * s.randomSzMultiplier,
+          };
+        });
+      }
+
+      window.addEventListener("resize", resize);
+      resize(); // Call initially
+
+      // Rotation state
+      let rotY = 0,
+        rotX = 0.28,
+        velY = 0.005,
+        velX = 0;
+      let drag = false,
+        lx = 0,
+        ly = 0;
+
+      // Clicks/touches on the body will be passed to canvas due to pointer-events
+      canvas.addEventListener("mousedown", (e) => {
+        drag = true;
+        lx = e.clientX;
+        ly = e.clientY;
+        velY = 0;
+        velX = 0;
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (!drag) return;
+        velY = (e.clientX - lx) * 0.004;
+        velX = (e.clientY - ly) * 0.004;
+        rotY += velY * 2;
+        rotX = Math.max(-1.4, Math.min(1.4, rotX + velX * 2));
+        lx = e.clientX;
+        ly = e.clientY;
+      });
+      window.addEventListener("mouseup", () => (drag = false));
+      canvas.addEventListener(
+        "touchstart",
+        (e) => {
+          drag = true;
+          lx = e.touches[0].clientX;
+          ly = e.touches[0].clientY;
+          velY = 0;
+          velX = 0;
+        },
+        { passive: true },
+      );
+      canvas.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!drag) return;
+          velY = (e.touches[0].clientX - lx) * 0.004;
+          velX = (e.touches[0].clientY - ly) * 0.004;
+          rotY += velY * 2;
+          rotX = Math.max(-1.4, Math.min(1.4, rotX + velX * 2));
+          lx = e.touches[0].clientX;
+          ly = e.touches[0].clientY;
+        },
+        { passive: true },
+      );
+      window.addEventListener("touchend", () => (drag = false));
+
+      function rot3(lat, lon) {
+        let x = Math.cos(lat) * Math.cos(lon),
+          y = Math.sin(lat),
+          z = Math.cos(lat) * Math.sin(lon);
+        const x1 = x * Math.cos(rotY) - z * Math.sin(rotY),
+          z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+        x = x1;
+        z = z1;
+        const y1 = y * Math.cos(rotX) - z * Math.sin(rotX),
+          z2 = y * Math.sin(rotX) + z * Math.cos(rotX);
+        return { x, y: y1, z: z2 };
+      }
+
+      function star5(px, py, out, inn) {
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 === 0 ? out : inn,
+            a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+          i === 0
+            ? ctx.moveTo(px + Math.cos(a) * r, py + Math.sin(a) * r)
+            : ctx.lineTo(px + Math.cos(a) * r, py + Math.sin(a) * r);
+        }
+        ctx.closePath();
+      }
+
+      function heart(px, py, sz, al) {
+        ctx.save();
+        ctx.globalAlpha = al;
+        ctx.translate(px, py);
+        const s = sz / 30;
+        ctx.scale(s, s);
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.bezierCurveTo(8, -18, 22, -5, 0, 10);
+        ctx.bezierCurveTo(-22, -5, -8, -18, 0, -8);
+        ctx.fillStyle = "#ff4d85";
+        ctx.shadowColor = "#ff80b0";
+        ctx.shadowBlur = 15;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      let t = 0;
+      function frame() {
+        t += 0.005; // abstract drift speed
+        if (!drag) {
+          rotY += velY;
+          rotX += velX;
+          velY *= 0.99;
+          velX *= 0.99;
+        }
+
+        // Batasi auto-rotX agar tidak berputar balik 360 derajat
+        if (!drag && Math.abs(velX) < 0.001) {
+          if (rotX > 0.4) rotX += (0.4 - rotX) * 0.01;
+          if (rotX < -0.2) rotX += (-0.2 - rotX) * 0.01;
+        }
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Full screen background radial gradient
+        const bgGrad = ctx.createRadialGradient(
+          W / 2,
+          H / 2,
+          0,
+          W / 2,
+          H / 2,
+          Math.max(W, H),
+        );
+        bgGrad.addColorStop(0, "#1a0b2e");
+        bgGrad.addColorStop(1, "#0a0514");
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // twinkle bg
+        bg.forEach((s) => {
+          s.ph += s.sp;
+          const a = s.a * (0.55 + 0.45 * Math.sin(s.ph));
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,245,220,${a})`;
+          ctx.fill();
+        });
+
+        // ambient globe glow
+        const gw = ctx.createRadialGradient(
+          cx,
+          cy,
+          globeR * 0.3,
+          cx,
+          cy,
+          globeR * 1.6,
+        );
+        gw.addColorStop(0, "rgba(120,60,210,0.15)");
+        gw.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gw;
+        ctx.fillRect(0, 0, W, H);
+
+        // globe fill
+        const gf = ctx.createRadialGradient(
+          cx - globeR * 0.3,
+          cy - globeR * 0.3,
+          globeR * 0.07,
+          cx,
+          cy,
+          globeR,
+        );
+        gf.addColorStop(0, "rgba(100,50,160,0.7)");
+        gf.addColorStop(0.6, "rgba(40,15,80,0.6)");
+        gf.addColorStop(1, "rgba(10,5,30,0.85)");
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, globeR, 0, Math.PI * 2);
+        ctx.fillStyle = gf;
+        ctx.fill();
+        ctx.restore();
+
+        // back dots
+        gpts.forEach((p) => {
+          const { x, y, z } = rot3(p.lat, p.lon);
+          if (z >= 0) return;
+          ctx.beginPath();
+          ctx.arc(cx + x * globeR, cy - y * globeR, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180,120,255,${0.08 + 0.06 * -z})`;
+          ctx.fill();
+        });
+
+        // globe ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, globeR, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(200,150,255,0.25)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // front dots + specular clipped
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, globeR, 0, Math.PI * 2);
+        ctx.clip();
+        gpts.forEach((p) => {
+          const { x, y, z } = rot3(p.lat, p.lon);
+          if (z < 0) return;
+          ctx.beginPath();
+          ctx.arc(cx + x * globeR, cy - y * globeR, 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(230,180,255,${0.15 + 0.35 * z})`;
+          ctx.fill();
+        });
+        const hl = ctx.createRadialGradient(
+          cx - globeR * 0.32,
+          cy - globeR * 0.34,
+          5,
+          cx - globeR * 0.18,
+          cy - globeR * 0.18,
+          globeR * 0.7,
+        );
+        hl.addColorStop(0, "rgba(255,255,255,0.18)");
+        hl.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = hl;
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+
+        // heart
+        heart(cx, cy, 18 + 3 * Math.sin(t * 4), 0.9);
+
+        // calculate 3D abstract stars
+        const items = stars
+          .map((s) => {
+            // apply slight drift to longitude to make them float slowly even when not dragging
+            const { x, y, z } = rot3(s.lat, s.lon + t);
+            return { s, px: cx + x * s.r, py: cy - y * s.r, depth: z };
+          })
+          .sort((a, b) => a.depth - b.depth);
+
+        items.forEach(({ s, px, py, depth }) => {
+          const sc = 0.55 + 0.45 * ((depth + 1) / 2),
+            sz = s.sz * sc;
+          s.gph += 0.02;
+          const ga = 0.4 + 0.3 * Math.sin(s.gph);
+
+          // CEK APAKAH FOTO ADA DI BELAKANG GLOBE
+          const distFromCenter = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2);
+          const isBehindGlobe = depth < 0 && distFromCenter < globeR * 0.95;
+          if (isBehindGlobe) return; // skip render jika tertutup globe
+
+          // Fade out saat mendekati tepi belakang globe
+          const edgeFade = depth < 0.15 ? Math.max(0, (depth + 0.15) / 0.3) : 1;
+
+          const h = ctx.createRadialGradient(px, py, 0, px, py, sz + 18);
+          h.addColorStop(0, `rgba(255,200,240,${ga * sc * edgeFade})`);
+          h.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = h;
+          ctx.fillRect(px - sz - 20, py - sz - 20, sz * 2 + 40, sz * 2 + 40);
+
+          if (s.loaded && s.img) {
+            ctx.save();
+            ctx.globalAlpha = (0.6 + 0.4 * sc) * edgeFade;
+            ctx.beginPath();
+            ctx.arc(px, py, sz / 2, 0, Math.PI * 2);
+            ctx.clip();
+            const iw = s.img.naturalWidth;
+            const ih = s.img.naturalHeight;
+            const size = Math.min(iw, ih);
+            const sx = (iw - size) / 2;
+            const sy = Math.max(0, ih * 0.05);
+            const cropH = Math.min(size, ih - sy);
+            ctx.drawImage(
+              s.img,
+              sx,
+              sy,
+              size,
+              cropH,
+              px - sz / 2,
+              py - sz / 2,
+              sz,
+              sz,
+            );
+            ctx.restore();
+            ctx.globalAlpha = edgeFade;
+            ctx.beginPath();
+            ctx.arc(px, py, sz / 2 + 2, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255,220,245,${0.85 * sc * edgeFade})`;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          } else {
+            ctx.save();
+            ctx.globalAlpha = (0.5 + 0.5 * sc) * edgeFade;
+            star5(px, py, sz / 2, sz / 4);
+            const sg = ctx.createRadialGradient(
+              px - sz * 0.15,
+              py - sz * 0.15,
+              0,
+              px,
+              py,
+              sz / 2,
+            );
+            sg.addColorStop(0, "#ffffff");
+            sg.addColorStop(0.4, "#ffd8f4");
+            sg.addColorStop(1, "#b576e8");
+            ctx.fillStyle = sg;
+            ctx.fill();
+            ctx.strokeStyle = `rgba(255,245,215,${0.5 * sc})`;
+            ctx.lineWidth = 1;
+            for (let k = 0; k < 4; k++) {
+              const a = (k / 4) * Math.PI * 2 + t * 5,
+                r1 = sz / 2 + 4,
+                r2 = sz / 2 + 12;
+              ctx.beginPath();
+              ctx.moveTo(px + Math.cos(a) * r1, py + Math.sin(a) * r1);
+              ctx.lineTo(px + Math.cos(a) * r2, py + Math.sin(a) * r2);
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+        });
+
+        requestAnimationFrame(frame);
+      }
+      frame();
+    </script>
+  </body>
+</html>
