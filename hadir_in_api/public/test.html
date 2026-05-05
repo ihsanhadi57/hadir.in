@@ -35,11 +35,12 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        z-index: 1; /* behind everything else */
+        z-index: 1;
         cursor: grab;
-        touch-action: none;
-        /* Optional: filter: drop-shadow(0 0 30px rgba(160, 100, 255, 0.2)); */
+        touch-action: pan-y; /* ganti dari none ke pan-y agar scroll tetap bisa */
       }
+      /* Optional: filter: drop-shadow(0 0 30px rgba(160, 100, 255, 0.2)); */
+
       canvas:active {
         cursor: grabbing;
       }
@@ -325,7 +326,6 @@
       </div>
 
       <!-- Note: globe is drawn dynamically by canvas -->
-      <div class="canvas-hint">drag to spin &middot; stars = her photos</div>
       <div class="scroll-down">&darr;</div>
     </div>
 
@@ -497,7 +497,16 @@
       }
 
       window.addEventListener("resize", resize);
-      resize(); // Call initially
+
+      function init() {
+        resize();
+        requestAnimationFrame(() => {
+          resize();
+          frame();
+        });
+      }
+
+      window.addEventListener("load", init);
 
       // Rotation state
       let rotY = 0,
@@ -541,6 +550,16 @@
         "touchmove",
         (e) => {
           if (!drag) return;
+          // Hitung apakah gerakan lebih horizontal atau vertikal
+          const dx = Math.abs(e.touches[0].clientX - lx);
+          const dy = Math.abs(e.touches[0].clientY - ly);
+
+          // Jika gerakan lebih vertikal, biarkan scroll jalan
+          if (dy > dx) {
+            drag = false;
+            return;
+          }
+
           velY = (e.touches[0].clientX - lx) * 0.004;
           velX = (e.touches[0].clientY - ly) * 0.004;
           rotY += velY * 2;
@@ -810,7 +829,7 @@
 
         requestAnimationFrame(frame);
       }
-      frame();
+      window.addEventListener("load", init);
     </script>
   </body>
 </html>
