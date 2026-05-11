@@ -6,6 +6,12 @@ const emailService = require('../services/emailService');
 
 const googleClient = new OAuth2Client();
 
+// Audience yang diterima: Web Dashboard + Firebase Web Client (untuk mobile)
+const GOOGLE_AUDIENCES = [
+    process.env.GOOGLE_CLIENT_ID,                // Web Dashboard (untuk login web)
+    process.env.GOOGLE_CLIENT_ID_MOBILE,          // Firebase Web Client (untuk login mobile)
+].filter(Boolean); // Hapus undefined jika env tidak diset
+
 // ─── Helper: Strip password from user object ───
 const sanitizeUser = (user) => {
     const { password: _, ...safe } = user;
@@ -115,7 +121,7 @@ const googleLogin = async (req, res) => {
 
         const ticket = await googleClient.verifyIdToken({
             idToken,
-            audience: process.env.GOOGLE_CLIENT_ID || undefined,
+            audience: GOOGLE_AUDIENCES.length > 0 ? GOOGLE_AUDIENCES : undefined,
         });
         const payload = ticket.getPayload();
         const email = payload.email;
@@ -157,7 +163,7 @@ const googleLogin = async (req, res) => {
 
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET || 'secret_jwt_key',
+            process.env.JWT_SECRET || 'rahasia_super_aman_jwt_123',
             { expiresIn: '30d' }
         );
 
