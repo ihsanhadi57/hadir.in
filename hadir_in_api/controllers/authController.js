@@ -93,7 +93,7 @@ const login = async (req, res) => {
 
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET || 'rahasia_super_aman_jwt_123',
+            process.env.JWT_SECRET,
             { expiresIn: '30d' }
         );
 
@@ -163,7 +163,7 @@ const googleLogin = async (req, res) => {
 
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET || 'rahasia_super_aman_jwt_123',
+            process.env.JWT_SECRET,
             { expiresIn: '30d' }
         );
 
@@ -292,7 +292,7 @@ const verifyOTP = async (req, res) => {
         // Generate Token Baru agar user bisa langsung masuk
         const token = jwt.sign(
             { id: updatedUser.id, email: updatedUser.email, role: updatedUser.role },
-            process.env.JWT_SECRET || 'rahasia_super_aman_jwt_123',
+            process.env.JWT_SECRET,
             { expiresIn: '30d' }
         );
 
@@ -311,6 +311,57 @@ const verifyOTP = async (req, res) => {
     }
 };
 
+const resendOTP = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ status: "error", message: "Email wajib diisi." });
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+            return res.status(404).json({ status: "error", message: "Akun tidak ditemukan." });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ status: "error", message: "Akun sudah terverifikasi." });
+        }
+
+        // Cek cooldown: tidak boleh request OTP baru jika OTP lama masih berlaku > 8 menit
+        if (user.otpExpires && user.otpExpires > new Date(Date.now() + 2 * 60 * 1000)) {
+            return res.status(429).json({
+                status: "error",
+                message: "Silakan tunggu sebentar sebelum meminta kode baru."
+            });
+        }
+
+        // Generate OTP Baru
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 menit
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { otpCode, otpExpires }
+        });
+
+        // Kirim OTP via Email
+        await emailService.sendOTPEmail(email, otpCode).catch(err => {
+            console.error("Gagal kirim ulang OTP:", err.message);
+        });
+
+        return res.status(200).json({
+            status: "success",
+            message: "Kode OTP baru telah dikirim ke email Anda."
+        });
+
+    } catch (error) {
+        console.error("Error di resendOTP:", error);
+        return res.status(500).json({ status: "error", message: "Gagal mengirim ulang OTP." });
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -318,4 +369,5 @@ module.exports = {
     getMe,
     updateProfile,
     verifyOTP,
+    resendOTP,
 };

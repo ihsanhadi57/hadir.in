@@ -15,6 +15,9 @@ router.post('/google', authController.googleLogin);
 // Route untuk verifikasi OTP
 router.post('/verify-otp', authController.verifyOTP);
 
+// Route untuk kirim ulang OTP (jika kadaluarsa)
+router.post('/resend-otp', authController.resendOTP);
+
 // ─── Protected Routes (butuh JWT) ───
 // Ambil profil user yang sedang login
 router.get('/me', authMiddleware, authController.getMe);
