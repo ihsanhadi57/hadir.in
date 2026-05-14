@@ -353,7 +353,7 @@ const renderSelfCheckInPage = async (req, res) => {
     <div class="w-full max-w-md fade-in">
         <!-- Header with Logo -->
         <div class="flex flex-col items-center mb-10">
-            <img src="/public/logo-no-bg.png" alt="Logo" class="h-16 mb-4 drop-shadow-md">
+            <img src="/logo-no-bg.png" alt="Logo" class="h-16 mb-4 drop-shadow-md">
             <h1 class="text-3xl font-extrabold tracking-tight">
                 <span class="brand-hadir">hadir</span><span class="brand-in">.in</span>
             </h1>

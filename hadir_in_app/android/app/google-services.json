@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "115014454509-7kp3983toojaap4anpcv95m40v0j8fae.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hadirin.mobile",
+            "certificate_hash": "8ed2db43b4f3ba6a31844cc876fceaa3e3be4da8"
+          }
+        },
+        {
+          "client_id": "115014454509-fibnnch02m17jl2alsohi2283lial0ri.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hadirin.mobile",
+            "certificate_hash": "2ea49307402eea6d89df9208352b41289b946159"
+          }
+        },
+        {
           "client_id": "115014454509-rv7ssl50u52i440c9vs3p9t54ak84sdn.apps.googleusercontent.com",
           "client_type": 3
         }
