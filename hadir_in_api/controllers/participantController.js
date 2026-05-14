@@ -10,6 +10,9 @@ const axios = require('axios');
 const emailService = require('../services/emailService');
 const { isValidEmailFormat, fixEmailTypo, hasValidMxRecord } = require('../utils/emailValidator');
 
+// ─── Penalti untuk email invalid (melindungi reputasi domain dari bounce) ───
+const BOUNCE_PENALTY = 5;
+
 /**
  * Helper: Fetch remote image URL into a Buffer for Sharp processing.
  * Sharp cannot read remote URLs directly — only file paths or Buffers.
@@ -75,14 +78,14 @@ const buildTicketImage = async (templateBuffer, cfg, ticketId, participantName) 
         // Lebar SVG = sisa ruang dari nameX sampai tepi kanan template
         let svgWidth = tplW - nameX;
         if (svgWidth < 50) {
-             svgWidth = 50;
-             nameX = tplW - 50; // geser kiri agar muat
+            svgWidth = 50;
+            nameX = tplW - 50; // geser kiri agar muat
         }
-        
+
         let svgHeight = Math.min(fontSize + 20, tplH - nameY);
         if (svgHeight < 20) {
-             svgHeight = 20;
-             nameY = tplH - 20; // geser atas agar muat
+            svgHeight = 20;
+            nameY = tplH - 20; // geser atas agar muat
         }
 
         const displayName = participantName
@@ -211,7 +214,7 @@ const registerBulk = async (req, res) => {
         const separator = firstLine.includes(';') && !firstLine.includes(',') ? ';' : ',';
 
         fs.createReadStream(req.file.path)
-            .pipe(csv({ 
+            .pipe(csv({
                 separator,
                 mapHeaders: ({ header }) => {
                     // Bersihkan karakter aneh seperti BOM ganda atau spasi tersembunyi
@@ -432,7 +435,22 @@ const sendTicket = async (req, res) => {
 
         const isValidMx = await hasValidMxRecord(p.email);
         if (!isValidMx) {
-            return res.status(400).json({ status: "error", message: "Domain email tujuan tidak valid atau tidak memiliki mail server aktif (Invalid MX Record)." });
+            // ─── PENALTI: Kurangi quota karena email domain tidak valid ───
+            try {
+                await prisma.user.update({
+                    where: { id: req.user.id },
+                    data: { emailQuota: { decrement: BOUNCE_PENALTY } }
+                });
+                console.warn(`[sendTicket] ⚠️ PENALTI -${BOUNCE_PENALTY} quota untuk ${req.user.id} (email invalid: ${p.email})`);
+            } catch (penaltyErr) {
+                console.error('[sendTicket] Gagal apply penalti:', penaltyErr.message);
+            }
+
+            return res.status(400).json({
+                status: "error",
+                message: `Domain email "${p.email}" tidak valid (tidak memiliki mail server). Penalti: -${BOUNCE_PENALTY} quota. Pastikan email peserta benar sebelum mengirim.`,
+                data: { penalty: BOUNCE_PENALTY }
+            });
         }
 
         res.status(200).json({ status: "success", message: `Tiket sedang dikirim ke ${p.email}` });
@@ -518,28 +536,106 @@ const blastTickets = async (req, res) => {
             }
         }
 
-        const needed = targetParticipants.length;
-        if (organizer.emailQuota < needed) {
+        // ─── Filter: Lewati peserta yang unsubscribed ───
+        const eligibleParticipants = targetParticipants.filter(p => !p.unsubscribed);
+        if (eligibleParticipants.length === 0) {
+            return res.status(400).json({ status: "error", message: "Semua peserta di rentang ini sudah unsubscribed." });
+        }
+
+        // ─── Pre-Validasi Email: MX Record Check per domain (paralel) ───
+        // Grup berdasarkan domain agar efisien (1 domain = 1x DNS lookup)
+        const domainMap = new Map();
+        for (const p of eligibleParticipants) {
+            const domain = p.email.split('@')[1]?.toLowerCase();
+            if (!domainMap.has(domain)) domainMap.set(domain, []);
+            domainMap.get(domain).push(p);
+        }
+
+        const domainChecks = await Promise.all(
+            Array.from(domainMap.keys()).map(async (domain) => ({
+                domain,
+                valid: await hasValidMxRecord(`check@${domain}`)
+            }))
+        );
+
+        const validDomains = new Set(domainChecks.filter(r => r.valid).map(r => r.domain));
+        const validParticipants = [];
+        const invalidParticipants = [];
+
+        for (const [domain, participants] of domainMap) {
+            if (validDomains.has(domain)) {
+                validParticipants.push(...participants);
+            } else {
+                invalidParticipants.push(...participants);
+            }
+        }
+
+        // ─── Hitung biaya total: kirim + penalti ───
+        const sendCost = validParticipants.length;
+        const penaltyCost = invalidParticipants.length * BOUNCE_PENALTY;
+        const totalCost = sendCost + penaltyCost;
+
+        if (sendCost === 0 && invalidParticipants.length > 0) {
+            // Semua email invalid — tetap kenakan penalti
+            if (organizer.emailQuota >= penaltyCost) {
+                await prisma.user.update({
+                    where: { id: req.user.id },
+                    data: { emailQuota: { decrement: penaltyCost } }
+                });
+            }
+            const invalidEmails = invalidParticipants.map(p => p.email);
+            return res.status(400).json({
+                status: "error",
+                message: `Semua ${invalidParticipants.length} email memiliki domain tidak valid. Penalti: -${penaltyCost} quota. Perbaiki email berikut: ${invalidEmails.slice(0, 5).join(', ')}${invalidEmails.length > 5 ? '...' : ''}`,
+                data: { invalidCount: invalidParticipants.length, penaltyCost, invalidEmails: invalidEmails.slice(0, 10) }
+            });
+        }
+
+        if (organizer.emailQuota < totalCost) {
+            let msg = `Quota email tidak mencukupi.`;
+            if (invalidParticipants.length > 0) {
+                msg += ` Ditemukan ${invalidParticipants.length} email dengan domain invalid (penalti ${BOUNCE_PENALTY}×${invalidParticipants.length} = ${penaltyCost} quota).`;
+                msg += ` Total dibutuhkan: ${totalCost} quota (${sendCost} kirim + ${penaltyCost} penalti), sisa: ${organizer.emailQuota}.`;
+                msg += ` Perbaiki email yang salah atau tambah quota.`;
+            } else {
+                msg += ` Kamu butuh ${sendCost} email, tapi sisa quota kamu hanya ${organizer.emailQuota}. Tambah quota sekarang di halaman Akun!`;
+            }
             return res.status(429).json({
                 status: "error",
-                message: `Quota email tidak mencukupi. Kamu butuh ${needed} email, tapi sisa quota kamu hanya ${organizer.emailQuota}. Tambah quota sekarang di halaman Akun!`,
-                data: { needed, remaining: organizer.emailQuota }
+                message: msg,
+                data: { needed: totalCost, remaining: organizer.emailQuota, validCount: sendCost, invalidCount: invalidParticipants.length, penaltyCost }
             });
+        }
+
+        // ─── Respond ke client dengan info lengkap ───
+        let responseMsg = `Proses pengiriman ${validParticipants.length} tiket sedang berjalan di latar belakang.`;
+        if (invalidParticipants.length > 0) {
+            responseMsg += ` ⚠️ ${invalidParticipants.length} email dilewati karena domain tidak valid (penalti: -${penaltyCost} quota).`;
         }
 
         res.status(200).json({
             status: "success",
-            message: `Proses pengiriman tiket sedang berjalan di latar belakang dan membutuhkan waktu beberapa saat.`
+            message: responseMsg,
+            data: {
+                sending: validParticipants.length,
+                skipped: invalidParticipants.length,
+                penaltyCost,
+                totalQuotaUsed: totalCost
+            }
         });
 
-        // ─── Kurangi Quota & Tambah Counter (Optimistic, sebelum send) ───
+        // ─── Kurangi Quota & Tambah Counter ───
         await prisma.user.update({
             where: { id: req.user.id },
             data: {
-                emailQuota: { decrement: needed },
-                totalEmailsSent: { increment: needed },
+                emailQuota: { decrement: totalCost },
+                totalEmailsSent: { increment: sendCost },
             }
         });
+
+        if (invalidParticipants.length > 0) {
+            console.warn(`[blastTickets] ⚠️ PENALTI -${penaltyCost} quota untuk user ${req.user.id} (${invalidParticipants.length} email invalid: ${invalidParticipants.map(p => p.email).join(', ')})`);
+        }
 
         // ─── Debug: Log template info ───
         console.log(`[blastTickets] Event: ${event.name}`);
@@ -561,8 +657,8 @@ const blastTickets = async (req, res) => {
             console.log(`[blastTickets] ⚠️ Template TIDAK ditemukan, mengirim QR saja`);
         }
 
-        // Loop over target participants
-        for (const p of targetParticipants) {
+        // ─── Loop: Kirim HANYA ke peserta dengan email valid ───
+        for (const p of validParticipants) {
             let finalImageBuffer = null;
 
             if (templateBuffer && event.ticketConfig) {
@@ -591,7 +687,7 @@ const blastTickets = async (req, res) => {
             }
         }
 
-        console.log(`Proses blast tiket selesai untuk event ${event.name}`);
+        console.log(`[blastTickets] Blast selesai untuk event ${event.name} — ${validParticipants.length} terkirim, ${invalidParticipants.length} dilewati (penalti).`);
 
     } catch (error) {
         console.error("Error blastTickets:", error);

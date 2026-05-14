@@ -98,7 +98,7 @@ const sendTicketEmail = async (participant, event, ticketBuffer, unsubscribeUrl 
     const unsubscribeHtml = unsubscribeUrl
         ? `<div style="margin-top:24px;padding-top:20px;border-top:1px solid #E5E7EB;font-size:11px;color:#9CA3AF;text-align:center;">
                <p>Kamu menerima email ini karena terdaftar di event <strong>${event.name}</strong>.</p>
-               <a href="${unsubscribeUrl}" style="color:#6B7280;text-decoration:underline;">Berhenti terima email blast dari event ini</a>
+               <a href="${unsubscribeUrl}" style="color:#6B7280;text-decoration:underline;">Berhenti terima email dari event ini</a>
            </div>`
         : `<div style="margin-top:24px;padding-top:20px;border-top:1px solid #E5E7EB;font-size:11px;color:#9CA3AF;text-align:center;">
                <p>Email ini dikirim secara otomatis oleh Hadir.in.</p>

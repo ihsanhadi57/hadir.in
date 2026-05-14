@@ -19,16 +19,16 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
       color: Color(0xFF6C63FF),
     ),
     _FaqItem(
-      question: 'Gimana cara blast e-ticket ke semua peserta?',
+      question: 'Gimana cara kirim e-ticket ke semua peserta?',
       answer:
-          'Masuk ke halaman detail event-mu, terus cari tombol "Blast E-Ticket". Sistem bakal otomatis generate QR Code unik untuk tiap peserta dan kirim ke email mereka. Prosesnya jalan di background, jadi kamu bisa lanjut ngerjain hal lain!',
+          'Masuk ke halaman detail event-mu, terus cari tombol "Kirim E-Tickets". Sistem bakal otomatis generate QR Code unik untuk tiap peserta dan kirim ke email mereka. Prosesnya jalan di background, jadi kamu bisa lanjut ngerjain hal lain!',
       icon: Icons.email_outlined,
       color: Color(0xFF10B981),
     ),
     _FaqItem(
       question: 'Apa itu quota email dan cara kerjanya?',
       answer:
-          'Quota email adalah jatah berapa email yang bisa kamu kirim. Setiap akun baru dapat 50 email gratis. Satu kali blast ke 10 peserta = 10 quota terpakai. Kalau habis, kamu bisa top-up dengan harga yang super terjangkau!',
+          'Quota email adalah jatah berapa email yang bisa kamu kirim. Setiap akun baru dapat 50 email gratis. Satu kali kirim ke 10 peserta = 10 quota terpakai. Kalau habis, kamu bisa top-up dengan harga yang super terjangkau!',
       icon: Icons.data_usage_rounded,
       color: Color(0xFFF59E0B),
     ),
