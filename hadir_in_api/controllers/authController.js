@@ -31,6 +31,28 @@ const register = async (req, res) => {
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
+            // ─── Jika email sudah terdaftar tapi BELUM diverifikasi ───
+            // Kirim ulang OTP baru dan biarkan user masuk ke halaman verifikasi
+            if (!existingUser.isVerified) {
+                const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+                const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+                await prisma.user.update({
+                    where: { id: existingUser.id },
+                    data: { otpCode, otpExpires }
+                });
+
+                await emailService.sendOTPEmail(email, otpCode).catch(err => {
+                    console.error("Gagal kirim ulang OTP (re-register):", err.message);
+                });
+
+                return res.status(200).json({
+                    status: "pending_verification",
+                    message: "Email ini belum diverifikasi. Kode OTP baru telah dikirim ke email Anda."
+                });
+            }
+
+            // Email sudah terdaftar dan SUDAH diverifikasi → tolak
             return res.status(400).json({ status: "error", message: "Email sudah terdaftar." });
         }
 

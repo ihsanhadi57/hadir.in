@@ -89,8 +89,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-      await authRepository.register(event.name, event.email, event.password);
-      emit(const AuthRegisterSuccess());
+      final message = await authRepository.register(event.name, event.email, event.password);
+      emit(AuthRegisterSuccess(message: message));
     } on Exception catch (e) {
       emit(AuthFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }

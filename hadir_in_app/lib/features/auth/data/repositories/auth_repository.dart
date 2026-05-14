@@ -47,12 +47,22 @@ class AuthRepository {
   }
 
   // ─── Register ───
-  Future<void> register(String name, String email, String password) async {
+  Future<String> register(String name, String email, String password) async {
     try {
-      await _dioClient.dio.post(
+      final response = await _dioClient.dio.post(
         '/auth/register',
         data: {'name': name, 'email': email, 'password': password},
       );
+
+      // Cek apakah backend mengembalikan pending_verification
+      // (email sudah terdaftar tapi belum diverifikasi — OTP baru sudah dikirim)
+      final responseData = response.data as Map<String, dynamic>?;
+      if (responseData?['status'] == 'pending_verification') {
+        return responseData?['message'] as String? ??
+            'Email ini belum diverifikasi. Kode OTP baru telah dikirim ke email Anda.';
+      }
+
+      return 'Registrasi berhasil! Silakan cek email Anda untuk kode OTP.';
     } on DioException catch (e) {
       throw Exception(_getErrorMessage(e, 'Gagal mendaftar'));
     }
