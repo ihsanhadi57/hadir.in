@@ -7,20 +7,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:115014454509:android:01881ff54152045fad10e4",
+        "mobilesdk_app_id": "1:115014454509:android:ddcfc62104f99598ad10e4",
         "android_client_info": {
-          "package_name": "com.hadir_in_app"
+          "package_name": "com.hadirin.mobile"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "115014454509-pmpp5ish1cvrtn87shc8rcecmksbi7hg.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.hadir_in_app",
-            "certificate_hash": "8ed2db43b4f3ba6a31844cc876fceaa3e3be4da8"
-          }
-        },
         {
           "client_id": "115014454509-rv7ssl50u52i440c9vs3p9t54ak84sdn.apps.googleusercontent.com",
           "client_type": 3
@@ -35,7 +27,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "115014454509-rv7ssl50u52i440c9vs3p9t54ak84sdn.apps.googleusercontent.com",
+              "client_id": "115014454509-3411ek97bibeg3io0dq15ai5s0tgtll4.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

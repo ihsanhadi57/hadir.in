@@ -1,4 +1,4 @@
-package com.example.hadir_in_app
+package com.hadirin.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

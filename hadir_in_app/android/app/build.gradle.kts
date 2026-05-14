@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.hadir_in_app"
+    namespace = "com.hadirin.mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -42,7 +42,7 @@ android {
     defaultConfig {
         // Package name harus cocok dengan google-services.json dari Firebase.
         // Untuk mengubah ke ID lain, daftarkan dulu di Firebase Console → Project Settings → Android App.
-        applicationId = "com.hadir_in_app"
+        applicationId = "com.hadirin.mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
