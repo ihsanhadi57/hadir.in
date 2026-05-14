@@ -77,8 +77,11 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
         backgroundColor: AppTheme.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: AppTheme.textPrimary, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_rounded,
+            color: AppTheme.textPrimary,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -189,8 +192,11 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.chat_bubble_outline_rounded,
-                      size: 32, color: AppTheme.primary),
+                  const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 32,
+                    color: AppTheme.primary,
+                  ),
                   const SizedBox(height: 10),
                   Text(
                     'Masih ada pertanyaan?',
@@ -202,7 +208,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Hubungi tim kami di support@hadir.in atau DM Instagram @hadir.in — kami balas dalam 1x24 jam kerja!',
+                    'Hubungi tim kami di tickets.hardirin.app@gmail.com atau DM Instagram @hadir.in.app — kami balas dalam 1x24 jam kerja!',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
@@ -213,7 +219,9 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.primary,
                       borderRadius: BorderRadius.circular(999),
@@ -295,8 +303,11 @@ class _FaqCardState extends State<_FaqCard>
                         color: widget.item.color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(widget.item.icon,
-                          size: 18, color: widget.item.color),
+                      child: Icon(
+                        widget.item.icon,
+                        size: 18,
+                        color: widget.item.color,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

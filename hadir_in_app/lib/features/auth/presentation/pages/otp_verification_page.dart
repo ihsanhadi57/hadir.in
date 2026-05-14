@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/network/dio_client.dart';
+import '../../../../injection_container.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -22,6 +26,11 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
+  // ─── Countdown untuk resend OTP ───
+  int _resendCountdown = 0;
+  Timer? _countdownTimer;
+  bool _isResending = false;
+
   @override
   void dispose() {
     for (var controller in _controllers) {
@@ -30,6 +39,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     for (var node in _focusNodes) {
       node.dispose();
     }
+    _countdownTimer?.cancel();
     super.dispose();
   }
 
@@ -43,6 +53,77 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Masukkan 6 digit kode OTP')),
       );
+    }
+  }
+
+  Future<void> _onResendOtp() async {
+    if (_resendCountdown > 0 || _isResending) return;
+
+    setState(() => _isResending = true);
+
+    try {
+      final dioClient = sl<DioClient>();
+      await dioClient.dio.post(
+        '/auth/resend-otp',
+        data: {'email': widget.email},
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kode OTP baru telah dikirim ke email Anda!'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+
+        // Mulai countdown 60 detik agar tidak spam request
+        setState(() => _resendCountdown = 60);
+        _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          if (!mounted) {
+            timer.cancel();
+            return;
+          }
+          setState(() {
+            if (_resendCountdown > 0) {
+              _resendCountdown--;
+            } else {
+              timer.cancel();
+            }
+          });
+        });
+      }
+    } on DioException catch (e) {
+      // Ambil pesan error langsung dari response backend
+      final serverMessage = e.response?.data?['message'] as String?;
+      final statusCode = e.response?.statusCode ?? 0;
+
+      String displayMessage;
+      if (serverMessage != null && serverMessage.isNotEmpty) {
+        displayMessage = serverMessage;
+      } else if (statusCode == 404) {
+        displayMessage = 'Fitur ini belum tersedia. Pastikan server sudah diperbarui.';
+      } else if (statusCode == 0 || e.type == DioExceptionType.connectionTimeout) {
+        displayMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+      } else {
+        displayMessage = 'Gagal mengirim ulang OTP. Silakan coba lagi.';
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(displayMessage), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal mengirim ulang OTP. Silakan coba lagi.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isResending = false);
     }
   }
 
@@ -137,7 +218,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 ),
                 const SizedBox(height: 40),
 
-                // 6 OTP Boxes
+                // ─── 6 OTP Input Boxes ───
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(6, (index) {
@@ -148,18 +229,18 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                         controller: _controllers[index],
                         focusNode: _focusNodes[index],
                         textAlign: TextAlign.center,
-                        textAlignVertical: TextAlignVertical.center, // Pusatkan vertikal
+                        textAlignVertical: TextAlignVertical.center,
                         keyboardType: TextInputType.number,
                         maxLength: 1,
                         style: GoogleFonts.outfit(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF111827), // Paksa Hitam
+                          color: const Color(0xFF111827),
                         ),
                         decoration: InputDecoration(
                           counterText: "",
-                          isDense: true, // Padatkan konten
-                          contentPadding: EdgeInsets.zero, // Hapus padding yang memotong teks
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
@@ -186,7 +267,6 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           } else if (value.isEmpty && index > 0) {
                             _focusNodes[index - 1].requestFocus();
                           }
-
                           if (index == 5 && value.isNotEmpty) {
                             _onVerify();
                           }
@@ -198,6 +278,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
                 const SizedBox(height: 48),
 
+                // ─── Tombol Verifikasi ───
                 BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
                     return SizedBox(
@@ -231,24 +312,33 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
                 const SizedBox(height: 24),
 
-                TextButton(
-                  onPressed: () {
-                    // Logic kirim ulang OTP bisa ditambahkan nanti
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Kode OTP baru telah dikirim!'),
+                // ─── Tombol Kirim Ulang OTP dengan Cooldown ───
+                _isResending
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF4B5563),
+                        ),
+                      )
+                    : TextButton(
+                        onPressed: _resendCountdown > 0 ? null : _onResendOtp,
+                        child: Text(
+                          _resendCountdown > 0
+                              ? 'Kirim ulang dalam ${_resendCountdown}s'
+                              : 'Belum menerima kode? Kirim ulang',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _resendCountdown > 0
+                                ? const Color(0xFFD1D5DB)
+                                : const Color(0xFF4B5563),
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  child: Text(
-                    'Belum menerima kode? Kirim ulang',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF4B5563),
-                    ),
-                  ),
-                ),
+
+                const SizedBox(height: 24),
               ],
             ),
           ),

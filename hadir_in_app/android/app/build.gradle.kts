@@ -21,7 +21,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Package name harus cocok dengan google-services.json dari Firebase.
+        // Untuk mengubah ke ID lain, daftarkan dulu di Firebase Console → Project Settings → Android App.
         applicationId = "com.hadir_in_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.

@@ -301,19 +301,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
           const SizedBox(width: 12),
           const BrandText(fontSize: 28),
           const Spacer(),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceContainerLow,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person_rounded,
-              size: 20,
-              color: AppTheme.primary,
-            ),
-          ),
         ],
       ),
     );

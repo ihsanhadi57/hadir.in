@@ -40,14 +40,11 @@ class _AccountPageState extends State<AccountPage> {
           mode: LaunchMode.externalApplication,
         );
 
-        // Show success/info message
+        // Setelah user kembali dari browser pembayaran,
+        // refresh profil untuk mendapatkan quota terbaru.
+        // (Quota mungkin sudah diupdate oleh Midtrans webhook)
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Membuka halaman pembayaran...'),
-              backgroundColor: AppTheme.primary,
-            ),
-          );
+          context.read<AuthBloc>().add(FetchProfileRequested());
         }
       } else {
         throw Exception('Gagal membuka halaman pembayaran.');

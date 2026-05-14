@@ -14,6 +14,7 @@ import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/event/presentation/pages/join_event_page.dart';
 import 'features/event/presentation/pages/self_checkin_page.dart';
+import 'features/profile/presentation/pages/payment_result_page.dart';
 
 import 'injection_container.dart' as di;
 import 'package:intl/date_symbol_data_local.dart';
@@ -129,15 +130,27 @@ class _HadirInAppContentState extends State<HadirInAppContent> {
 
   void _handleUri(Uri uri) {
     if (uri.scheme == 'hadirin' && uri.host == 'invite') {
+      // ─── Deep Link: Undangan Panitia ───
       final code = uri.queryParameters['code'];
       if (code != null) {
-        // Navigate to JoinEventPage
         navigatorKey.currentState?.push(
           MaterialPageRoute(
             builder: (_) => JoinEventPage(inviteCode: code),
           ),
         );
       }
+    } else if (uri.scheme == 'hadirin' && uri.host == 'payment') {
+      // ─── Deep Link: Callback Pembayaran Midtrans ───
+      // URI: hadirin://payment/finish atau hadirin://payment/error
+      final pathSegment = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : 'finish';
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => PaymentResultPage(deepLinkStatus: pathSegment),
+        ),
+        // Hapus semua route payment yang mungkin menumpuk,
+        // tapi pertahankan route home (isFirst)
+        (route) => route.isFirst,
+      );
     }
   }
 

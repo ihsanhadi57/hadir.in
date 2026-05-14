@@ -34,4 +34,24 @@ class PaymentRepository {
       throw Exception('Gagal membuat transaksi: $e');
     }
   }
+
+  /// Ambil transaksi topup terbaru dari backend.
+  /// Digunakan oleh PaymentResultPage untuk cek status pembayaran yang sebenarnya.
+  /// Return null jika tidak ada transaksi atau gagal fetch.
+  Future<Map<String, dynamic>?> getLatestTransaction() async {
+    try {
+      final response = await _dioClient.dio.get('/payment/history');
+      if (response.data['status'] == 'success') {
+        final List<dynamic> data = response.data['data'] as List<dynamic>;
+        if (data.isNotEmpty) {
+          return data.first as Map<String, dynamic>;
+        }
+      }
+      return null;
+    } on DioException {
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
 }
