@@ -93,11 +93,20 @@ const handleWebhook = async (req, res) => {
         const notificationJson = req.body;
         console.log(`\n[Midtrans Webhook] RAW INCOMING REQUEST:`, JSON.stringify(notificationJson));
 
-        // Verify Signature
+        const { order_id, status_code, gross_amount, signature_key, transaction_status, fraud_status } = notificationJson;
+
+        // ─── Handle Midtrans Dashboard Notification Test ───
+        // Test notifikasi dari dashboard menggunakan signature yang berbeda
+        // dari transaksi nyata — tidak bisa diverifikasi dengan server key biasa.
+        // Return 200 agar dashboard menampilkan "Test success".
+        if (order_id && order_id.startsWith('payment_notif_test_')) {
+            console.log(`[Midtrans Webhook] Dashboard test notification received. OrderID: ${order_id}. Returning 200.`);
+            return res.status(200).json({ status: 'success', message: 'Test notification received' });
+        }
+
+        // ─── Verify Signature untuk transaksi real ───
         // Reference: https://docs.midtrans.com/en/after-payment/http-notification?id=signature-key-verification
-        const { order_id, status_code, gross_amount, signature_key } = notificationJson;
         const serverKey = process.env.MIDTRANS_SERVER_KEY;
-        
         const payload = order_id + status_code + gross_amount + serverKey;
         const expectedSignature = crypto.createHash('sha512').update(payload).digest('hex');
 
@@ -106,10 +115,7 @@ const handleWebhook = async (req, res) => {
             return res.status(401).json({ status: 'error', message: 'Invalid Signature' });
         }
 
-        const transactionStatus = notificationJson.transaction_status;
-        const fraudStatus = notificationJson.fraud_status;
-
-        console.log(`[Midtrans Webhook] Verification Success. Order ID: ${order_id}. Status: ${transactionStatus}. Fraud: ${fraudStatus}`);
+        console.log(`[Midtrans Webhook] Verification Success. Order ID: ${order_id}. Status: ${transaction_status}. Fraud: ${fraud_status}`);
 
         // Find transaction
         const transaction = await prisma.topupTransaction.findUnique({
@@ -125,17 +131,17 @@ const handleWebhook = async (req, res) => {
         // Reference: https://docs.midtrans.com/en/after-payment/http-notification?id=transaction-status-redirection-to-callback-url
         let newStatus = transaction.status;
 
-        if (transactionStatus == 'capture') {
-            if (fraudStatus == 'challenge') {
+        if (transaction_status == 'capture') {
+            if (fraud_status == 'challenge') {
                 newStatus = 'challenge';
-            } else if (fraudStatus == 'accept') {
+            } else if (fraud_status == 'accept') {
                 newStatus = 'settlement';
             }
-        } else if (transactionStatus == 'settlement') {
+        } else if (transaction_status == 'settlement') {
             newStatus = 'settlement';
-        } else if (transactionStatus == 'cancel' || transactionStatus == 'deny' || transactionStatus == 'expire') {
+        } else if (transaction_status == 'cancel' || transaction_status == 'deny' || transaction_status == 'expire') {
             newStatus = 'failure';
-        } else if (transactionStatus == 'pending') {
+        } else if (transaction_status == 'pending') {
             newStatus = 'pending';
         }
 

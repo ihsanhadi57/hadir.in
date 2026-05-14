@@ -158,21 +158,12 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             Center(
               child: Text(
-                'Sudah siap?',
+                'Masuk dulu, yuk!',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             const SizedBox(height: 6),
-            Center(
-              child: Text(
-                'Masuk dulu, yuk!',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textMuted,
-                ),
-              ),
-            ),
+
             const SizedBox(height: 32),
 
             // ─── Email ───
