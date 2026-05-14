@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -345,7 +347,39 @@ class _RegisterPageState extends State<RegisterPage> {
                   height: 1.5,
                 ),
                 children: [
-                  const TextSpan(text: 'Saya setuju sama Syarat & Ketentuan '),
+                  const TextSpan(text: 'Saya setuju sama '),
+                  TextSpan(
+                    text: 'Syarat & Ketentuan',
+                    style: TextStyle(
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () async {
+                        final url = Uri.parse('https://hadirin.space/tnc.html');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        }
+                      },
+                  ),
+                  const TextSpan(text: ' dan '),
+                  TextSpan(
+                    text: 'Kebijakan Privasi',
+                    style: TextStyle(
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () async {
+                        final url = Uri.parse(
+                          'https://hadirin.space/privacy.html',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        }
+                      },
+                  ),
+                  const TextSpan(text: ' dari '),
                   TextSpan(
                     text: 'hadir',
                     style: TextStyle(
