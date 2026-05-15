@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'; // for kIsWeb
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/constants/api_config.dart';
 import '../../../../core/widgets/brand_text.dart';
 
@@ -214,8 +215,12 @@ class _SelfCheckInPageState extends State<SelfCheckInPage> {
         backgroundColor: Colors.white,
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
+            padding: EdgeInsets.all(
+              ResponsiveLayout.contentPadding(context),
+            ),
+            child: ResponsiveCenter(
+              maxWidth: 540,
+              child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
@@ -251,6 +256,7 @@ class _SelfCheckInPageState extends State<SelfCheckInPage> {
                 ),
               ],
             ),
+            ),
           ),
         ),
       );
@@ -279,8 +285,12 @@ class _SelfCheckInPageState extends State<SelfCheckInPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
+        padding: EdgeInsets.all(
+          ResponsiveLayout.contentPadding(context),
+        ),
+        child: ResponsiveCenter(
+          maxWidth: 540,
+          child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -412,6 +422,7 @@ class _SelfCheckInPageState extends State<SelfCheckInPage> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/widgets/brand_text.dart';
 import '../../../../core/services/socket_service.dart';
 import '../../data/models/event_model.dart';
@@ -161,22 +162,47 @@ class _EventsPageState extends State<EventsPage> {
         slivers: [
           SliverToBoxAdapter(child: _buildSectionHeader(all)),
           SliverToBoxAdapter(child: _buildFilterChips()),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)), // ← margin
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
           if (filtered.isEmpty)
             SliverFillRemaining(child: _buildEmpty())
           else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: EventCard(event: filtered[i]),
+            Builder(builder: (context) {
+              final crossAxisCount = ResponsiveLayout.gridCrossAxisCount(context);
+              final hPadding = ResponsiveLayout.contentPadding(context);
+
+              if (crossAxisCount > 1) {
+                // Tablet/desktop: grid layout
+                return SliverPadding(
+                  padding: EdgeInsets.fromLTRB(hPadding, 0, hPadding, 100),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 1.25,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) => EventCard(event: filtered[i]),
+                      childCount: filtered.length,
+                    ),
                   ),
-                  childCount: filtered.length,
+                );
+              }
+
+              // Phone: single column list
+              return SliverPadding(
+                padding: EdgeInsets.fromLTRB(hPadding, 0, hPadding, 100),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (ctx, i) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: EventCard(event: filtered[i]),
+                    ),
+                    childCount: filtered.length,
+                  ),
                 ),
-              ),
-            ),
+              );
+            }),
         ],
       ),
     );
@@ -184,7 +210,10 @@ class _EventsPageState extends State<EventsPage> {
 
   Widget _buildSectionHeader(List<EventModel> all) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      padding: EdgeInsets.fromLTRB(
+        ResponsiveLayout.contentPadding(context), 24,
+        ResponsiveLayout.contentPadding(context), 0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -212,7 +241,9 @@ class _EventsPageState extends State<EventsPage> {
 
   Widget _buildFilterChips() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 0, 0),
+      padding: EdgeInsets.fromLTRB(
+        ResponsiveLayout.contentPadding(context), 16, 0, 0,
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(

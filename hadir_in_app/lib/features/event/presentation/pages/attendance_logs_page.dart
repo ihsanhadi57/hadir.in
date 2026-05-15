@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../data/models/event_detail_models.dart';
 import '../../data/repositories/event_repository.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../widgets/log_card.dart';
 
 class AttendanceLogsPage extends StatefulWidget {
@@ -105,7 +106,9 @@ class _AttendanceLogsPageState extends State<AttendanceLogsPage> {
               ),
             )
           : ListView.separated(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(
+                ResponsiveLayout.contentPadding(context),
+              ),
               itemCount: _logs.length,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {

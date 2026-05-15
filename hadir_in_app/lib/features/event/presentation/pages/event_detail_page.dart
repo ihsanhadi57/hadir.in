@@ -13,6 +13,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import 'package:hadir_in_app/features/event/presentation/pages/design_ticket_page.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/services/socket_service.dart';
 import '../../data/models/event_model.dart';
 import '../../data/models/event_detail_models.dart';
@@ -147,11 +148,13 @@ class _EventDetailPageState extends State<EventDetailPage> {
       onRefresh: _refresh,
       color: AppTheme.primary,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
+        padding: EdgeInsets.symmetric(
+          horizontal: ResponsiveLayout.contentPadding(context),
           vertical: 16,
         ),
-        child: Column(
+        child: ResponsiveCenter(
+          maxWidth: 700,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.event.imageUrl != null) ...[
@@ -214,6 +217,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             _buildLogsSection(logs),
             const SizedBox(height: 32),
           ],
+        ),
         ),
       ),
     );

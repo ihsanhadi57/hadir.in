@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../data/models/event_detail_models.dart';
 import 'package:get_it/get_it.dart';
 import '../../data/repositories/event_repository.dart';
@@ -359,8 +360,8 @@ class _ParticipantListPageState extends State<ParticipantListPage> {
               color: AppTheme.primary,
               onRefresh: _loadParticipants,
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
+                padding: EdgeInsets.symmetric(
+                  horizontal: ResponsiveLayout.contentPadding(context),
                   vertical: 16,
                 ),
                 itemCount: _filteredParticipants.length,

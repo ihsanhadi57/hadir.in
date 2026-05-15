@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../injection_container.dart';
@@ -155,9 +156,13 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveLayout.contentPadding(context),
+            ),
+            child: ResponsiveCenter(
+              maxWidth: 480,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
                 Text(
@@ -222,9 +227,11 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(6, (index) {
+                    final boxW = ResponsiveLayout.scaled(context, 46);
+                    final boxH = ResponsiveLayout.scaled(context, 56);
                     return SizedBox(
-                      width: 46,
-                      height: 56,
+                      width: boxW,
+                      height: boxH,
                       child: TextField(
                         controller: _controllers[index],
                         focusNode: _focusNodes[index],
@@ -340,6 +347,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
                 const SizedBox(height: 24),
               ],
+            ),
             ),
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../injection_container.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -144,12 +145,16 @@ class _PaymentResultPageState extends State<PaymentResultPage>
         backgroundColor: AppTheme.background,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: EdgeInsets.all(
+              ResponsiveLayout.contentPadding(context),
+            ),
             child: _txStatus == _TxStatus.checking
                 ? _buildLoadingState()
                 : FadeTransition(
                     opacity: _fadeAnim,
-                    child: Column(
+                    child: ResponsiveCenter(
+                      maxWidth: 480,
+                      child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Spacer(),
@@ -166,6 +171,7 @@ class _PaymentResultPageState extends State<PaymentResultPage>
                         _buildHomeButton(context),
                         const SizedBox(height: 16),
                       ],
+                    ),
                     ),
                   ),
           ),

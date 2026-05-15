@@ -7,6 +7,7 @@ import 'package:hadir_in_app/core/widgets/brand_text.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../data/repositories/event_repository.dart';
 import 'location_picker_page.dart';
 import '../../../../core/constants/api_config.dart';
@@ -246,22 +247,28 @@ class _CreateEventPageState extends State<CreateEventPage> {
             _buildTopBar(),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildPageTitle(),
-                      const SizedBox(height: 24),
-                      _buildEventInfoCard(),
-                      const SizedBox(height: 16),
-                      _buildBulkUploadCard(),
-                      const SizedBox(height: 32),
-                      _buildPrimaryButton(),
-                      const SizedBox(height: 12),
-                      _buildDraftButton(),
-                    ],
+                padding: EdgeInsets.fromLTRB(
+                  ResponsiveLayout.contentPadding(context), 24,
+                  ResponsiveLayout.contentPadding(context), 16,
+                ),
+                child: ResponsiveCenter(
+                  maxWidth: 600,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPageTitle(),
+                        const SizedBox(height: 24),
+                        _buildEventInfoCard(),
+                        const SizedBox(height: 16),
+                        _buildBulkUploadCard(),
+                        const SizedBox(height: 32),
+                        _buildPrimaryButton(),
+                        const SizedBox(height: 12),
+                        _buildDraftButton(),
+                      ],
+                    ),
                   ),
                 ),
               ),

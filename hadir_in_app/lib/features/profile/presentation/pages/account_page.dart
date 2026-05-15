@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hadir_in_app/features/event/data/repositories/payment_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../injection_container.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -88,15 +89,21 @@ class _AccountPageState extends State<AccountPage> {
                   },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
-                    child: Column(
-                      children: [
-                        _buildProfileCard(context, user),
-                        const SizedBox(height: 20),
-                        if (user != null) _buildQuotaCard(context, user),
-                        if (user != null) const SizedBox(height: 20),
-                        _buildMenuList(context, user),
-                      ],
+                    padding: EdgeInsets.fromLTRB(
+                      ResponsiveLayout.contentPadding(context), 24,
+                      ResponsiveLayout.contentPadding(context), 40,
+                    ),
+                    child: ResponsiveCenter(
+                      maxWidth: 600,
+                      child: Column(
+                        children: [
+                          _buildProfileCard(context, user),
+                          const SizedBox(height: 20),
+                          if (user != null) _buildQuotaCard(context, user),
+                          if (user != null) const SizedBox(height: 20),
+                          _buildMenuList(context, user),
+                        ],
+                      ),
                     ),
                   ),
                 ),

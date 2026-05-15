@@ -65,38 +65,43 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           height: 64,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                icon: Icons.event_note_rounded,
-                label: 'Events',
-                isSelected: _selectedIndex == 0,
-                onTap: () => setState(() => _selectedIndex = 0),
-              ),
-              // ─── Simple & Clean Plus Button (No floating gap) ───
-              GestureDetector(
-                onTap: () => setState(() => _selectedIndex = 1),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _selectedIndex == 1 ? AppTheme.primary : AppTheme.surfaceContainerLow,
-                    shape: BoxShape.circle,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _NavItem(
+                    icon: Icons.event_note_rounded,
+                    label: 'Events',
+                    isSelected: _selectedIndex == 0,
+                    onTap: () => setState(() => _selectedIndex = 0),
                   ),
-                  child: Icon(
-                    Icons.add_rounded,
-                    color: _selectedIndex == 1 ? Colors.white : AppTheme.textMuted,
-                    size: 28,
+                  // ─── Simple & Clean Plus Button (No floating gap) ───
+                  GestureDetector(
+                    onTap: () => setState(() => _selectedIndex = 1),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _selectedIndex == 1 ? AppTheme.primary : AppTheme.surfaceContainerLow,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add_rounded,
+                        color: _selectedIndex == 1 ? Colors.white : AppTheme.textMuted,
+                        size: 28,
+                      ),
+                    ),
                   ),
-                ),
+                  _NavItem(
+                    icon: Icons.person_rounded,
+                    label: 'Akun',
+                    isSelected: _selectedIndex == 2,
+                    onTap: () => setState(() => _selectedIndex = 2),
+                  ),
+                ],
               ),
-              _NavItem(
-                icon: Icons.person_rounded,
-                label: 'Akun',
-                isSelected: _selectedIndex == 2,
-                onTap: () => setState(() => _selectedIndex = 2),
-              ),
-            ],
+            ),
           ),
         ),
       ),

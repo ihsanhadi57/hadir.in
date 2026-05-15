@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -111,12 +112,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
           builder: (context, state) {
             final isLoading = state is AuthProfileUpdating;
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              padding: EdgeInsets.all(
+                ResponsiveLayout.contentPadding(context),
+              ),
+              child: ResponsiveCenter(
+                maxWidth: 540,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     // ─── Avatar (Photo or Initials) ───
                     Center(
                       child: Stack(
@@ -398,6 +403,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ],
                 ),
+              ),
               ),
             );
           },

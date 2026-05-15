@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/widgets/brand_text.dart';
 import '../../presentation/bloc/auth_bloc.dart';
 import '../../presentation/bloc/auth_event.dart';
@@ -59,15 +60,15 @@ class _SplashPageState extends State<SplashPage> {
                 borderRadius: BorderRadius.circular(24),
                 child: Image.asset(
                   'assets/images/logo.png',
-                  width: 100,
-                  height: 100,
+                  width: ResponsiveLayout.scaled(context, 100),
+                  height: ResponsiveLayout.scaled(context, 100),
                   fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 20),
 
               // Brand name
-              const BrandText(fontSize: 28),
+              BrandText(fontSize: ResponsiveLayout.scaled(context, 28)),
 
               const SizedBox(height: 48),
 

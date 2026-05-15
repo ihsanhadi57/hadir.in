@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 
 class HelpFaqPage extends StatefulWidget {
   const HelpFaqPage({super.key});
@@ -95,8 +96,13 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-        child: Column(
+        padding: EdgeInsets.fromLTRB(
+          ResponsiveLayout.contentPadding(context), 8,
+          ResponsiveLayout.contentPadding(context), 40,
+        ),
+        child: ResponsiveCenter(
+          maxWidth: 640,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ─── Header Banner ───
@@ -239,6 +245,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

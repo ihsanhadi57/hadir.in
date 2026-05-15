@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -115,15 +116,20 @@ class _RegisterPageState extends State<RegisterPage> {
                   _buildTopBar(),
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          _buildFormCard(),
-                          const SizedBox(height: 24),
-                          _buildFooterLinks(),
-                          const SizedBox(height: 32),
-                        ],
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ResponsiveLayout.contentPadding(context),
+                      ),
+                      child: ResponsiveCenter(
+                        maxWidth: 480,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            _buildFormCard(),
+                            const SizedBox(height: 24),
+                            _buildFooterLinks(),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
                       ),
                     ),
                   ),

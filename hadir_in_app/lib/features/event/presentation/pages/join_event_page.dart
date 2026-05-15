@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../data/repositories/event_repository.dart';
@@ -75,9 +76,13 @@ class _JoinEventPageState extends State<JoinEventPage> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(
+          ResponsiveLayout.contentPadding(context),
+        ),
         child: Center(
-          child: Column(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
@@ -142,6 +147,7 @@ class _JoinEventPageState extends State<JoinEventPage> {
                 ),
               ],
             ],
+          ),
           ),
         ),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/widgets/brand_text.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -91,19 +92,24 @@ class _LoginPageState extends State<LoginPage> {
             SafeArea(
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 32),
-                      _buildBrandHeader(),
-                      const SizedBox(height: 40),
-                      _buildFormCard(),
-                      const SizedBox(height: 24),
-                      _buildFooterLinks(),
-                      const SizedBox(height: 40),
-                      _buildBottomCopyright(),
-                      const SizedBox(height: 16),
-                    ],
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveLayout.contentPadding(context),
+                  ),
+                  child: ResponsiveCenter(
+                    maxWidth: 480,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 32),
+                        _buildBrandHeader(),
+                        const SizedBox(height: 40),
+                        _buildFormCard(),
+                        const SizedBox(height: 24),
+                        _buildFooterLinks(),
+                        const SizedBox(height: 40),
+                        _buildBottomCopyright(),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -118,27 +124,30 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       children: [
         // ─── Logo Badge ───
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primary.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
-          ),
-        ),
+        Builder(builder: (context) {
+          final logoSize = ResponsiveLayout.scaled(context, 80);
+          return Container(
+            width: logoSize,
+            height: logoSize,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
+            ),
+          );
+        }),
         const SizedBox(height: 16),
         // ─── Wordmark ───
-        const BrandText(fontSize: 28),
+        BrandText(fontSize: ResponsiveLayout.scaled(context, 28)),
       ],
     );
   }

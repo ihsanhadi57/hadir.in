@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../data/repositories/event_repository.dart';
 
 class AddParticipantManualPage extends StatefulWidget {
@@ -90,10 +91,14 @@ class _AddParticipantManualPageState extends State<AddParticipantManualPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
+          padding: EdgeInsets.all(
+            ResponsiveLayout.contentPadding(context),
+          ),
+          child: ResponsiveCenter(
+            maxWidth: 540,
+            child: Form(
+              key: _formKey,
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -177,6 +182,7 @@ class _AddParticipantManualPageState extends State<AddParticipantManualPage> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),
